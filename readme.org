@@ -1,0 +1,39 @@
+#+TITLE: ETABLI: name-based workspace management for SWAY
+#+Time-stamp: <2025-02-24 17:13:36>
+
+
+
+* Initial Disclaimer
+This project is not in a usable shape at the moment! Please bear with me as I move all that is needed to this repository.
+
+* What is Etabli?
+** Tagline
+Allow non-trivial workspace management in =sway=!
+** Goals
+Using =swaywm= as a window manager, I work on multiple projects at the same time. Each project requires multiple workspaces: typically, an emacs/evince workspace to write my notes, a workspace just for firefox with the tabs relevant to this project only, and another workspace with emacs/several terminals for the experimental part. Navigating these workspaces using only numbers is very cumbersome: I constantly create and delete new ones.
+
+As a consequence, I wanted a way to:
+1. have workspaces defined by their names, not their number, along with a convenient =dmenu= interface to switch between them;
+2. group workspaces by theme, and cycle through the workspaces withing a theme easily;
+3. easily create a workspace with a specific set of windows opened, laid out in a specific way, automatically.
+
+The first goal is achieved pretty easily since =swaywm= provides what we need basically out of the box. The next ones require a bit more work.
+** Usage
+TODO
+
+* Setup
+** Dependencies
+=Etabli= needs the [[https://github.com/altdesktop/i3ipc-python][i3ipc-python]] module (=pip install i3ipc-python=), and =rofi= (though it should work with your favorite choice of =dmenu=-type interface).
+
+** Sway configuration
+To use, simply add something like the following snippet to your =sway= configuration, where =~/etabli/workspaces.py= needs to be replaced by the actual path.
+
+#+BEGIN_SRC
+bindsym $mod+o exec python3 <path/to/workspaces.py> next_workspace_in_level
+bindsym $mod+u exec python3 <path/to/workspaces.py> previous_workspace_in_level
+bindsym $mod+Shift+o exec python3 <path/to/workspaces.py> new_workspace_in_level
+#+END_SRC
+
+With this configuration, pressing =mod+o= will move the focus to the next workspace (in alphabetic order) on the same level. It does nothing if there is a single workspace on this level. Pressing =mod+u= moves the other way. Finally, pressing =mod+Shift+o= moves the focus to a new workspace on the same level.
+
+* TODO Documentation
