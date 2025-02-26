@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-from i3ipc import Connection
+from i3ipc import Connection, Event
 from subprocess import Popen
 from time import sleep
 from sys import argv
 
-from workspace_commands import *
+#from workspace_commands import *
 
 SWAY = Connection()
-SEPARATOR = "~"
+SEPARATOR = "/"
 KEEP_GOING = True
 DONE = False
 
@@ -148,13 +148,63 @@ def new_workspace_in_level():
             focus_workspace(format_workspace_name(current, i))
 
 
+# !SECTION! Sorting workspaces
+
+def return_workspaces():
+    names = [sp.name for sp in SWAY.get_workspaces()]
+    names.sort(key=str.casefold) # to have case insensitive sorting
+    for n in names:
+        print(n)
+
+        
+def next_workspace():
+    names = [sp.name for sp in SWAY.get_workspaces()]
+    names.sort(key=str.casefold) # to have case insensitive sorting
+    current_name = current_workspace_name()
+    if current_name != names[-1]:
+        focus_workspace(names[names.index(current_name)+1])
+    else:
+        focus_workspace(names[0])
+
+
+def prev_workspace():
+    names = [sp.name for sp in SWAY.get_workspaces()]
+    names.sort(key=str.casefold) # to have case insensitive sorting
+    current_name = current_workspace_name()
+    if current_name != names[0]:
+        focus_workspace(names[names.index(current_name)-1])
+    else:
+        focus_workspace(names[-1])
+
+
+
+
 # !SECTION! Main program 
 
 if __name__ == "__main__":
-    if argv[1] == "next_workspace_in_level":
+    # general cycling
+    if argv[1] == "next_workspace":
+        next_workspace()
+    elif argv[1] == "prev_workspace":
+        prev_workspace()
+    # by level
+    elif argv[1] == "next_workspace_in_level":
         next_workspace_in_level()
     elif argv[1] == "previous_workspace_in_level":
         previous_workspace_in_level()
     elif argv[1] == "new_workspace_in_level":
         new_workspace_in_level()
-    
+    # general utilities
+    elif argv[1] == "get_workspaces":
+        return_workspaces()
+    elif argv[1] == "current_workspace":
+        print(current_workspace_name())
+    else:
+        raise Exception("unknown input: {}".format(argv[1]))
+
+    # !TODO! change logic: win+horizontal arrows cycles within a level, vertical arrows cycles between levels 
+
+
+    # !TODO! take current output into account when cycling
+
+

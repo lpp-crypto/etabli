@@ -1,0 +1,9 @@
+#!/usr/bin/sh
+
+OLD_NAME=$(python3 ~/etabli/etabli.py current_workspace)
+NEW_NAME=$(rofi -dmenu -i -p "Enter new name (old was $OLD_NAME)")
+if [[ $NEW_NAME ]]; then
+    swaymsg rename workspace $OLD_NAME to $NEW_NAME
+else
+    echo "not doing anything"
+fi

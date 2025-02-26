@@ -1,0 +1,11 @@
+#!/usr/bin/zsh
+
+WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
+echo $WORKSPACES
+SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i -p "Send window to workspace")
+if [[ $SELECTED_WORKSPACE ]]; then
+    swaymsg move container to workspace "$SELECTED_WORKSPACE"
+    swaymsg workspace "$SELECTED_WORKSPACE"
+else
+    echo "not doing anything"
+fi

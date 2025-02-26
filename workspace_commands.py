@@ -1,6 +1,6 @@
-# Time-stamp: <2025-02-23 17:20:19>
+# Time-stamp: <2025-02-26 10:33:11>
 
-from workspaces import *
+from etabli import *
 
 commands = {
     "firefox" : [NewWorkspaceIfNotExists("firefox"), SHexec("firefox")],
