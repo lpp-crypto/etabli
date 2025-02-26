@@ -2,10 +2,23 @@
 
 from etabli import *
 
+# change the following variables to change the colors
+COLOR_ACTIVE_LEVEL = "#00C000"
+COLOR_ACTIVE_INDEX = "#C00000"
+
 def print_current_workspace(SWAY, e):
     MAIN_ETABLI.get_state_from_wm()
-    print(MAIN_ETABLI)
+    print(MAIN_ETABLI, flush=True)
 
+def active_level(txt):
+    return "<span color='{}' weight='bold' >{}</span>".format(
+        COLOR_ACTIVE,
+        txt
+    )
+
+def level(txt):
+    return "<span weight='bold' >{}</span>".format(txt)
+    
     
 def format_main_level(lev):
     return "<span color='0xC00000'>" + lev + "</span>"
@@ -33,8 +46,8 @@ class Etabli:
 
     def __str__(self):
         result = ""
-        bracket_open  = "<span color='#111111'>[</span>"
-        bracket_close = "<span color='#111111'>]</span>"
+        bracket_open  = "<span color='#111111'> [ </span>"
+        bracket_close = "<span color='#111111'> ] </span>"
         index_separator = "<span color='#555555'>|</span>"
         for lev in sorted(self.levels.keys(), key=str.casefold):
             if lev == self.current_level:
@@ -57,12 +70,13 @@ class Etabli:
                     else:
                         result += "{} ".format(index) + index_separator + " "
                 result = result[:-1] + bracket_close + " "
-        print("current: {}\n\n".format(self.current_level))
         return result[:-1]
 
 def waybar_input(SWAY, e):
     MAIN_ETABLI.get_state_from_wm()
     print( '{"text" : "' + str(MAIN_ETABLI) + '", "tooltip": false, "percentage": 0.0, "class" : "custom-etabli"}', flush=True)
+
+    
 
 
 if __name__ == "__main__":
