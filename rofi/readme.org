@@ -31,7 +31,7 @@ We grab the name of all the workspaces by parsing the output of =swaymsg -t get_
 
 WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
 echo $WORKSPACES
-SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i -p "Go to workspace")
+SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i -p "Go to workspace" -theme-str "listview {lines: 15; columns: 2;}")
 if [[ $SELECTED_WORKSPACE ]]; then
     swaymsg workspace "$SELECTED_WORKSPACE"
 else
