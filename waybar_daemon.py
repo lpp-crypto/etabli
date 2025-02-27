@@ -42,13 +42,13 @@ class Etabli:
             else:
                 pretty_lev = lev
             if len(self.levels[lev]) == 1:
-                result += "{}{}{} ".format(
-                    bracket_open + "<span weight='bold'>",
+                result += "{}{}{}".format(
+                    " <span weight='bold'>",
                     pretty_lev,
-                    "</span>" + bracket_close
+                    "</span> "
                 )
             else:
-                result += bracket_open + " <span weight='bold'>{}</span>  ".format(
+                result += bracket_open + "<span weight='bold'>{}</span>  ".format(
                     pretty_lev,
                 )
                 for index in sorted(self.levels[lev], key=str.casefold):
@@ -56,7 +56,7 @@ class Etabli:
                         result += "<span color='#C00000' style='italic'>{}</span> ".format(index) + index_separator + " "
                     else:
                         result += "{} ".format(index) + index_separator + " "
-                result = result[:-1] + bracket_close + " "
+                result = result[:-(1+len(index_separator))] + bracket_close + " "
         print("current: {}\n\n".format(self.current_level))
         return result[:-1]
 
