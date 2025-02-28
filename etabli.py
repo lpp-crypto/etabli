@@ -146,6 +146,7 @@ def new_workspace_in_level():
     for i in range(0, len(current_level)+1):
         if (current, i) not in current_level:
             focus_workspace(format_workspace_name(current, i))
+            break
 
 
 # !SECTION! Sorting workspaces
