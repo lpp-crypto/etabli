@@ -1,5 +1,5 @@
 #+TITLE: ETABLI: name-based workspace management for SWAY
-#+Time-stamp: <2025-02-26 18:24:36>
+#+Time-stamp: <2025-02-27 14:38:14>
 
 
 
@@ -37,14 +37,17 @@ bindsym $mod+Shift+o exec python3 <path/to/workspaces.py> new_workspace_in_level
 With this configuration, pressing =mod+o= will move the focus to the next workspace (in alphabetic order) on the same level. It does nothing if there is a single workspace on this level. Pressing =mod+u= moves the other way. Finally, pressing =mod+Shift+o= moves the focus to a new workspace on the same level.
 
 ** Waybar
-Adding the following to your waybar configuration will enable you to add a module to it that replaces the =sway/workspaces= one. The advantages of this replacement one is that the workspaces are shown in alphabetic order rather than in order of creation, and that the levels appear explicitely. The main downside is that clicking on a workspace doesn't do anything specific, it just open the =rofi= workspace switcher (assuming you set it up).
+Adding the following to your waybar configuration will enable you to add a module to it that replaces the =sway/workspaces= one. The advantages of this replacement one is that the workspaces are shown in alphabetic order rather than in order of creation, and that the levels appear explicitely. The main downside is that clicking on a specific workspace doesn't do anything specific to that workspace. Instead, with the following configuration, a left click and a right click select the previous/next workspace, and a middle-click opens the rofi-based workspace switcher.
 
 #+BEGIN_SRC
   "custom/etabli": {
       "format": " {}",
-      "exec": "python $HOME/etabli/waybar_daemon.py",
+      "exec": "python3 $HOME/etabli/waybar_daemon.py",
+      "restart-interval": 1,
       "return-type": "json",
-      "on-click": "zsh $HOME/etabli/rofi/rofi-workspace-switch",
+      "on-click": "python3 $HOME/etabli/etabli.py prev_workspace",
+      "on-click-right": "python3 $HOME/etabli/etabli.py next_workspace",
+      "on-click-middle": "zsh $HOME/etabli/rofi/rofi-workspace-switch",
   },
 #+END_SRC
 * TODO Documentation
