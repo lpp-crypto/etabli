@@ -13,7 +13,7 @@ We need to grab the name of the current workspace (I use the method given [[http
 We use =-i= to get rid of case sensitivity. If you disagree, simply remove that option.
 
 #+BEGIN_SRC sh :tangle ./rofi-workspace-rename :results output silent
-#!/usr/bin/sh
+#!/usr/bin/zsh
 
 OLD_NAME=$(python3 ~/etabli/etabli.py current_workspace)
 NEW_NAME=$(rofi -dmenu -i -p "Enter new name (old was $OLD_NAME)")
@@ -67,3 +67,4 @@ bindsym $mod+b exec zsh path/to/rofi_folder/rofi-workspace-switch
 bindsym $mod+Shift+b exec zsh path/to/rofi_folder/rofi-workspace-send
 #+END_SRC
 
+With these settings, pressing =mod+n= will create a rofi prompt to choose which workspace to switch to. 

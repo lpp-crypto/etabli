@@ -1,10 +1,10 @@
 #+TITLE: ETABLI: name-based workspace management for SWAY
-#+Time-stamp: <2025-02-27 14:38:14>
+#+Time-stamp: <2025-03-01 18:10:44>
 
 
 
 * Initial Disclaimer
-This project is not in a usable shape at the moment! Please bear with me as I move all that is needed to this repository.
+This project taking shape: I use as my daily driver on two different computers. Still, very much at the alpha stage.
 
 * What is Etabli?
 ** Tagline
@@ -19,27 +19,41 @@ As a consequence, I wanted a way to:
 
 The first goal is achieved pretty easily since =swaywm= provides what we need basically out of the box. The next ones require a bit more work.
 ** Usage
-TODO
+A level is simply defined as a set of workspace with names starting with the same string followed by a separator (by default, =/=). For example, =code/compile= and =code/sources= are automatically grouped into the same level.
 
 * Setup
 ** Dependencies
 =Etabli= needs the [[https://github.com/altdesktop/i3ipc-python][i3ipc-python]] module (=pip install i3ipc-python=), and =rofi= (though it should work with your favorite choice of =dmenu=-type interface).
 
 ** Sway configuration
-To use, simply add something like the following snippet to your =sway= configuration, where =~/etabli/workspaces.py= needs to be replaced by the actual path.
+To use, simply add something like the following snippets to your =sway= configuration, where =~/etabli/etabli.py= needs to be replaced by the actual path.
 
+*** Moving within levels
 #+BEGIN_SRC
-bindsym $mod+o exec python3 <path/to/workspaces.py> next_workspace_in_level
-bindsym $mod+u exec python3 <path/to/workspaces.py> previous_workspace_in_level
-bindsym $mod+Shift+o exec python3 <path/to/workspaces.py> new_workspace_in_level
+bindsym $mod+o exec python3 <path/to/etabli.py> next_workspace_in_level
+bindsym $mod+u exec python3 <path/to/etabli.py> previous_workspace_in_level
+bindsym $mod+Shift+o exec python3 <path/to/etabli.py> new_workspace_in_level
 #+END_SRC
 
 With this configuration, pressing =mod+o= will move the focus to the next workspace (in alphabetic order) on the same level. It does nothing if there is a single workspace on this level. Pressing =mod+u= moves the other way. Finally, pressing =mod+Shift+o= moves the focus to a new workspace on the same level.
 
+*** Moving in general
+The levels (including those with a unique workspace) are displayed in alphabetic order, not by increasing indices (on purpose). To switch workspace in the same order (as if they were, say, firefox tabs), you can also add the following.
+
+#+BEGIN_SRC
+bindsym $mod+Next exec python3 <path/to/etabli.py> next_workspace
+bindsym $mod+Prior exec python3 <path/to/etabli.py> prev_workspace
+#+END_SRC
+
+The keys =Next= and =Prior= correspond to the "page down" and "page up" keys. Pressing =mod+page down= will then shift to the next workshop in the list as it is displayed, ignoring the division into levels.
+
+** Rofi
+See the =./rofi= folder and its =readme.org= file.
+
 ** Waybar
 Adding the following to your waybar configuration will enable you to add a module to it that replaces the =sway/workspaces= one. The advantages of this replacement one is that the workspaces are shown in alphabetic order rather than in order of creation, and that the levels appear explicitely. The main downside is that clicking on a specific workspace doesn't do anything specific to that workspace. Instead, with the following configuration, a left click and a right click select the previous/next workspace, and a middle-click opens the rofi-based workspace switcher.
 
-#+BEGIN_SRC
+#+BEGIN_SRC 
   "custom/etabli": {
       "format": " {}",
       "exec": "python3 $HOME/etabli/waybar_daemon.py",
@@ -50,4 +64,15 @@ Adding the following to your waybar configuration will enable you to add a modul
       "on-click-middle": "zsh $HOME/etabli/rofi/rofi-workspace-switch",
   },
 #+END_SRC
-* TODO Documentation
+
+The appearance of the waybar module is configured by changing the prettifying functions at the top of the =waybar_daemon.py= script. The default setting is intended to be used with the following waybar CSS.
+
+#+BEGIN_SRC css
+#custom-etabli {
+    background-color: rgba(170, 170, 170, 0.9);
+    padding-left:2px;
+    padding-right:2px;
+}
+#+END_SRC
+* Known problems
+- Multiple outputs are not handle very gracefully by the waybar module: it simply displays the workspaces of the focused output, on all outputs at the same time. Any suggestions to fix this is welcome!

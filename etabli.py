@@ -29,6 +29,34 @@ def current_workspace_name():
             return sp.name
     raise Exception("somehow, no workspace was found!")
     
+
+# !SUBSECTION! Dealing with levels 
+
+def format_workspace_name(name, index):
+    if index == "0":
+        return name
+    else:
+        return "{}{}{}".format(name, SEPARATOR, index)
+    
+
+def split_workspace_name(sp_name):
+    if SEPARATOR in sp_name:
+        splitted = sp_name.split(SEPARATOR)
+        return (splitted[0], splitted[1])
+    else:
+        return (sp_name, "0")
+
+    
+def get_level(name):
+    result = []
+    for sp in SWAY.get_workspaces():
+        if name in sp.name:
+            result.append(split_workspace_name(sp.name))
+    result.sort()
+    return result
+            
+
+# !SECTION! Creating new workspaces
     
 def launch_chain(instructions):
     result = KEEP_GOING
@@ -38,9 +66,6 @@ def launch_chain(instructions):
             return DONE
     return KEEP_GOING
 
-
-
-# !SECTION! Creating new workspaces
 
 class NewWorkspaceIfNotExists:
     def __init__(self, name):
@@ -91,92 +116,69 @@ class Tiling:
 
 # !SECTION! Cycling within a level of workspaces
 
-def format_workspace_name(name, index):
-    if index == "0":
-        return name
-    else:
-        return "{}{}{}".format(name, SEPARATOR, index)
-    
+def cycle_workspace_in_level(amount):
+    current_name = current_workspace_name()
+    current, index = split_workspace_name(current_name)
+    current_level = get_level(current)
+    next_space = current_level[
+        (current_level.index((current, index)) + amount) % len(current_level)
+    ]
+    focus_workspace(format_workspace_name(next_space[0], next_space[1]))
 
-def split_workspace_name(sp_name):
-    if SEPARATOR in sp_name:
-        splitted = sp_name.split(SEPARATOR)
-        return (splitted[0], splitted[1])
-    else:
-        return (sp_name, "0")
-
-    
-def get_level(name):
-    result = []
-    for sp in SWAY.get_workspaces():
-        if name in sp.name:
-            result.append(split_workspace_name(sp.name))
-    result.sort()
-    return result
-            
 
 def next_workspace_in_level():
-    current_name = current_workspace_name()
-    current, index = split_workspace_name(current_name)
-    current_level = get_level(current)
-    pos = 0
-    while (current, index) != current_level[pos]:
-        pos += 1
-    next_space = current_level[(pos + 1) % len(current_level)]
-    focus_workspace(format_workspace_name(next_space[0], next_space[1]))
-    
+    cycle_workspace_in_level(1)
 
     
-    
 def previous_workspace_in_level():
-    current_name = current_workspace_name()
-    current, index = split_workspace_name(current_name)
-    current_level = get_level(current)
-    pos = 0
-    while (current, index) != current_level[pos]:
-        pos += 1
-    next_space = current_level[(pos - 1) % len(current_level)]
-    focus_workspace(format_workspace_name(next_space[0], next_space[1]))
-    
+    cycle_workspace_in_level(-1)
 
         
 def new_workspace_in_level():
     current, index = split_workspace_name(current_workspace_name())
     current_level = get_level(current)
     for i in range(0, len(current_level)+1):
-        if (current, i) not in current_level:
-            focus_workspace(format_workspace_name(current, i))
+        if (current, str(i)) not in current_level:
+            focus_workspace(format_workspace_name(current, str(i)))
             break
 
 
 # !SECTION! Sorting workspaces
 
-def return_workspaces():
-    names = [sp.name for sp in SWAY.get_workspaces()]
-    names.sort(key=str.casefold) # to have case insensitive sorting
+def current_output():
+    for o in SWAY.get_outputs():
+        if o.active:
+            return o.name
+    raise Exception("no active output found!")
+
+
+def workspaces_in_current_output():
+    c_o = current_output()
+    result = []
+    for sp in SWAY.get_workspaces():
+        if sp.output == c_o:
+            result.append( sp.name )
+    result.sort(key=str.casefold) # to have case insensitive sorting
+    return result
+
+
+def print_workspaces():
+    names = workspaces_in_current_output()
     for n in names:
         print(n)
 
+def cycle_workspace_in_output(amount):
+    names = workspaces_in_current_output()
+    current_name = current_workspace_name()
+    focus_workspace(names[(names.index(current_name)+amount) % len(names)])
+
         
 def next_workspace():
-    names = [sp.name for sp in SWAY.get_workspaces()]
-    names.sort(key=str.casefold) # to have case insensitive sorting
-    current_name = current_workspace_name()
-    if current_name != names[-1]:
-        focus_workspace(names[names.index(current_name)+1])
-    else:
-        focus_workspace(names[0])
+    cycle_workspace_in_output(1)
 
-
+    
 def prev_workspace():
-    names = [sp.name for sp in SWAY.get_workspaces()]
-    names.sort(key=str.casefold) # to have case insensitive sorting
-    current_name = current_workspace_name()
-    if current_name != names[0]:
-        focus_workspace(names[names.index(current_name)-1])
-    else:
-        focus_workspace(names[-1])
-
+    cycle_workspace_in_output(-1)
 
 
 
@@ -197,7 +199,7 @@ if __name__ == "__main__":
         new_workspace_in_level()
     # general utilities
     elif argv[1] == "get_workspaces":
-        return_workspaces()
+        print_workspaces()
     elif argv[1] == "current_workspace":
         print(current_workspace_name())
     else:
