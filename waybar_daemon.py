@@ -10,9 +10,10 @@ from etabli import *
 
 # -- colors
 ACTIVE_COLOR = "#C00000"
-ACTIVE_LEVEL_COLOR = "#993333"
+ACTIVE_LEVEL_COLOR = "#883333"
 SEPARATOR_COLOR = "#DDDDDD"
-REGULAR_COLOR = "#333333"
+REGULAR_COLOR = "#252525"
+REGULAR_LEVEL_COLOR = "#666666"
 
 # -- separators
 LEVEL_SEPARATOR = "<span color='{}'>⋅</span>".format(SEPARATOR_COLOR)
@@ -24,9 +25,17 @@ def weight_selector(active):
     else:
         return "normal"
 
-def color_selector(active):
+def color_selector_workspace(active, in_level=False):
     if active:
         return ACTIVE_COLOR
+    elif in_level:
+        return REGULAR_COLOR
+    else:
+        return REGULAR_LEVEL_COLOR
+
+def color_selector_level(active):
+    if active:
+        return ACTIVE_LEVEL_COLOR
     else:
         return REGULAR_COLOR
 
@@ -44,24 +53,28 @@ def pretty_level(lev, indices, current):
         active = (current[0] == lev)
         return " <span weight='{}' color='{}'>{}</span> ".format(
             weight_selector(True),
-            color_selector(active),
+            color_selector_workspace(active, in_level=True),
             lev
         )
     else:
-        result = "<span color='{}'> [</span>".format(ACTIVE_COLOR if (lev == current[0]) else SEPARATOR_COLOR)
-        active = (lev == current[0])
+        active_level = (lev == current[0])
+        result = "<span color='{}'> [</span>".format(
+            ACTIVE_COLOR if (active_level) else SEPARATOR_COLOR
+        )
         result += "<span style='italic' color='{}'>{}</span>".format(
-            color_selector(active),
+            color_selector_level(active_level),
             lev
         )
         for index in sorted(indices, key=str.casefold):
             active =  (lev == current[0] and index == current[1])
             result += "<span weight='{}' color='{}'> {} </span>".format(
                 weight_selector(active),
-                color_selector(active),
+                color_selector_workspace(active, in_level=active_level),
                 index
             )        
-        result += "<span color='{}'>] </span>".format(ACTIVE_COLOR if (lev == current[0]) else SEPARATOR_COLOR)
+        result += "<span color='{}'>] </span>".format(
+            ACTIVE_COLOR if (active_level) else SEPARATOR_COLOR
+        )
         return result
         
 
