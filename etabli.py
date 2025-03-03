@@ -147,7 +147,7 @@ def new_workspace_in_level():
 
 def current_output():
     for o in SWAY.get_outputs():
-        if o.active:
+        if o.focused:
             return o.name
     raise Exception("no active output found!")
 
