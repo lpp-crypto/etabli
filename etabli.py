@@ -162,11 +162,6 @@ def workspaces_in_current_output():
     return result
 
 
-def print_workspaces():
-    names = workspaces_in_current_output()
-    for n in names:
-        print(n)
-
 def cycle_workspace_in_output(amount):
     names = workspaces_in_current_output()
     current_name = current_workspace_name()
@@ -181,6 +176,19 @@ def prev_workspace():
     cycle_workspace_in_output(-1)
 
 
+# !SECTION! Utilities 
+
+def print_workspaces_in_current_output():
+    names = workspaces_in_current_output()
+    for n in names:
+        print(n)
+
+def print_workspaces():
+    names = [o.name for o in SWAY.get_workspaces()]
+    names.sort(key=str.casefold) # to have case insensitive sorting
+    for n in names:
+        print(n)
+        
 
 # !SECTION! Main program 
 
@@ -198,6 +206,8 @@ if __name__ == "__main__":
     elif argv[1] == "new_workspace_in_level":
         new_workspace_in_level()
     # general utilities
+    elif argv[1] == "get_workspaces_in_output":
+        print_workspaces_in_output()
     elif argv[1] == "get_workspaces":
         print_workspaces()
     elif argv[1] == "current_workspace":
