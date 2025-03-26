@@ -1,22 +1,35 @@
-#+TITLE: ZSH Scripts Providing a ROFI Interface
+#+TITLE: ZSH Scripts Providing a dmenu-like Interface
 
 
 
-This [[https://orgmode.org/][orgmode]] file is both the documentation and the original source code for the scripts in this folder. They use the =etabli.py= script in combination with some basic =zsh= scripting to interact with the [[https://github.com/davatorium/rofi][rofi]] launcher, and use it to provide a convenient interface to deal with workspaces and levels.
+This [[https://orgmode.org/][orgmode]] file is both the documentation and the original source code for the scripts in this folder. They use the =etabli.py= script in combination with some basic =zsh= scripting to interact with the dmenu-like launcher of your choice, e.g. [[https://github.com/davatorium/rofi][rofi]], and use it to provide a convenient interface to deal with workspaces and levels.
 
 Similar results could be achieved using =jq= to for instance parse the output of =swaymsg -t get_workspaces= (in fact, this is how these scripts started), but I preferred to get rid of the dependence on =jq= and instead have =etabli.py= handle such interaction, the aim being to allow abritrarily complex processing down the line.
 
 * Building the ZSH Scripts
+** Setting up the launcher
+
+
+#+NAME: dmenu-command
+#+BEGIN_SRC sh
+rofi -dmenu -i  -config ~/.config/rofi/rofi.rasi -p 
+#+END_SRC
+
+
+#+NAME: dmenu
+#+BEGIN_SRC sh
+~/.cargo/bin/kickoff --from-stdin --stdout -p
+#+END_SRC
 ** Renaming
-We need to grab the name of the current workspace (I use the method given [[https://gist.github.com/Sprit3Dan/bb730c9405d4632cc90a1d36b5400207][here]], the name to give (using rofi in =-dmenu= mode), and then the right message via =swaymsg=.
+We need to grab the name of the current workspace (I use the method given [[https://gist.github.com/Sprit3Dan/bb730c9405d4632cc90a1d36b5400207][here]]), the name to give (using the launcher), and then the right message via =swaymsg=.
 
-We use =-i= to get rid of case sensitivity. If you disagree, simply remove that option.
 
-#+BEGIN_SRC sh :tangle ./rofi-workspace-rename :results output silent
+#+BEGIN_SRC sh :tangle ./rofi-workspace-rename :results output silent :noweb yes
 #!/usr/bin/zsh
 
 OLD_NAME=$(python3 ~/etabli/etabli.py current_workspace)
-NEW_NAME=$(rofi -dmenu -i -p "Enter new name (old was $OLD_NAME)")
+LEVEL=$(python3 ~/etabli/etabli.py current_level)
+NEW_NAME=$(<<dmenu-command>> "Enter new name (old was \`$OLD_NAME\`)" -filter $LEVEL/ -l 0)
 if [[ $NEW_NAME ]]; then
     swaymsg rename workspace $OLD_NAME to $NEW_NAME
 else
@@ -26,16 +39,17 @@ fi
 ** Switching
 We grab the name of all the workspaces by parsing the output of =swaymsg -t get_workspaces= using =jq=, and then use =rofi= to select one.
 
-#+BEGIN_SRC sh :tangle ./rofi-workspace-switch :results output silent
+#+BEGIN_SRC sh :tangle ./rofi-workspace-switch :results output silent :noweb yes
 #!/usr/bin/zsh
 
 WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
 echo $WORKSPACES
-SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i -p "Go to workspace" -theme-str "listview {lines: 15; columns: 2;}")
+SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Go to workspace")
 if [[ $SELECTED_WORKSPACE ]]; then
     swaymsg workspace "$SELECTED_WORKSPACE"
 else
     echo "not doing anything"
+
 fi
 #+END_SRC
 ** Sending container
@@ -44,12 +58,12 @@ focused window there.
 
 After sending the container, we "follow" it by also switching the
 workspace.
-#+BEGIN_SRC sh :tangle ./rofi-workspace-send :results output silent
+#+BEGIN_SRC sh :tangle ./rofi-workspace-send :results output silent :noweb yes
 #!/usr/bin/zsh
 
 WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
 echo $WORKSPACES
-SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i -p "Send window to workspace")
+SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Send window to workspace")
 if [[ $SELECTED_WORKSPACE ]]; then
     swaymsg move container to workspace "$SELECTED_WORKSPACE"
     swaymsg workspace "$SELECTED_WORKSPACE"

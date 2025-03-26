@@ -29,6 +29,16 @@ def current_workspace_name():
             return sp.name
     raise Exception("somehow, no workspace was found!")
     
+    
+def current_level_name():
+    for sp in SWAY.get_workspaces():
+        if sp.focused:
+            if SEPARATOR in sp.name:
+                return split_workspace_name(sp.name)[0]
+            else:
+                return sp.name
+    raise Exception("somehow, no workspace was found!")
+    
 
 # !SUBSECTION! Dealing with levels 
 
@@ -202,6 +212,8 @@ if __name__ == "__main__":
         print_workspaces()
     elif argv[1] == "current_workspace":
         print(current_workspace_name())
+    elif argv[1] == "current_level":
+        print(current_level_name())
     else:
         raise Exception("unknown input: {}".format(argv[1]))
 
