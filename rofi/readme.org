@@ -7,19 +7,32 @@ This [[https://orgmode.org/][orgmode]] file is both the documentation and the or
 Similar results could be achieved using =jq= to for instance parse the output of =swaymsg -t get_workspaces= (in fact, this is how these scripts started), but I preferred to get rid of the dependence on =jq= and instead have =etabli.py= handle such interaction, the aim being to allow abritrarily complex processing down the line.
 
 * Building the ZSH Scripts
-** Setting up the launcher
+** Common Variables and Setup
+The command running the =etabli.py= script must be set here.
 
+#+NAME: etabli
+#+BEGIN_SRC sh
+python3 ~/etabli/etabli.py
+#+END_SRC
+
+
+
+If you intend to use =rofi= as your prompt, the following line will start it in the proper mode. Feel free to customize this line if, for instance, your =rofi= configuration doesn't live in the specified directory.
 
 #+NAME: dmenu-command
 #+BEGIN_SRC sh
 rofi -dmenu -i  -config ~/.config/rofi/rofi.rasi -p 
 #+END_SRC
 
+Alternatively, rename the following snippet to =dmenu-command= to replace =rofi= with =kickoff=. You can basically use any =dmenu=-style tool, provided that you can create a command-line whereby the list of choices is specified as a newline separated list sent through =stdin=, and where the prompt can be appended to the end of the string.
 
-#+NAME: dmenu
+#+NAME: dmenu-command-unused
 #+BEGIN_SRC sh
-~/.cargo/bin/kickoff --from-stdin --stdout -p
+~/.cargo/bin/kickoff --from-stdin --stdout -p 
 #+END_SRC
+
+#+RESULTS: dmenu-command-unused
+
 ** Renaming
 We need to grab the name of the current workspace (I use the method given [[https://gist.github.com/Sprit3Dan/bb730c9405d4632cc90a1d36b5400207][here]]), the name to give (using the launcher), and then the right message via =swaymsg=.
 
@@ -27,9 +40,11 @@ We need to grab the name of the current workspace (I use the method given [[http
 #+BEGIN_SRC sh :tangle ./rofi-workspace-rename :results output silent :noweb yes
 #!/usr/bin/zsh
 
-OLD_NAME=$(python3 ~/etabli/etabli.py current_workspace)
-LEVEL=$(python3 ~/etabli/etabli.py current_level)
-NEW_NAME=$(<<dmenu-command>> "Enter new name (old was \`$OLD_NAME\`)" -filter $LEVEL/ -l 0)
+OLD_NAME=$(<<etabli>> current_workspace)
+LEVEL=$(<<etabli>> current_level)
+NEW_NAME=$(<<etabli>> prepare | <<dmenu-command>> "Enter new name (old was \`$OLD_NAME\`)" -filter $LEVEL/ -l 0 | awk -F " " '{print $NF}')
+
+
 if [[ $NEW_NAME ]]; then
     swaymsg rename workspace $OLD_NAME to $NEW_NAME
 else
@@ -42,9 +57,9 @@ We grab the name of all the workspaces by parsing the output of =swaymsg -t get_
 #+BEGIN_SRC sh :tangle ./rofi-workspace-switch :results output silent :noweb yes
 #!/usr/bin/zsh
 
-WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
+WORKSPACES=$(<<etabli>> get_workspaces)
 echo $WORKSPACES
-SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Go to workspace")
+SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Go to workspace" | awk -F " " '{print $NF}')
 if [[ $SELECTED_WORKSPACE ]]; then
     swaymsg workspace "$SELECTED_WORKSPACE"
 else
@@ -61,12 +76,31 @@ workspace.
 #+BEGIN_SRC sh :tangle ./rofi-workspace-send :results output silent :noweb yes
 #!/usr/bin/zsh
 
-WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
+WORKSPACES=$(<<etabli>> get_workspaces)
 echo $WORKSPACES
 SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Send window to workspace")
 if [[ $SELECTED_WORKSPACE ]]; then
     swaymsg move container to workspace "$SELECTED_WORKSPACE"
     swaymsg workspace "$SELECTED_WORKSPACE"
+else
+    echo "not doing anything"
+fi
+#+END_SRC
+** Listing all windows
+This time, we
+#+BEGIN_SRC sh :tangle ./rofi-window-find :results output silent :noweb yes
+#!/usr/bin/zsh
+
+WINDOWS=$(<<etabli>> list_windows)
+echo $WINDOWS
+SELECTED_DATA=$(echo $WINDOWS | <<dmenu-command>> "Select window")
+if [[ $SELECTED_DATA ]]; then
+    SELECTED_WORKSPACE=$(echo -n $SELECTED_DATA | cut -f 1)
+    SELECTED_WINDOW=$(echo -n $SELECTED_DATA | cut -f 2)
+    echo $SELECTED_WORKSPACE
+    echo $SELECTED_WINDOW
+    swaymsg workspace "$SELECTED_WORKSPACE"
+    <<etabli>> focus_window "$SELECTED_WINDOW"
 else
     echo "not doing anything"
 fi
