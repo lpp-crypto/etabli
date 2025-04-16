@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-04-06 16:08:12>
+# Time-stamp: <2025-04-16 11:37:33>
 
 
 
@@ -73,11 +73,14 @@ def split_workspace_name(sp_name):
 
     
 def get_level(name):
-    result = []
+    sp_in_level = []
     for sp in SWAY.get_workspaces():
         if name in sp.name:
-            result.append(split_workspace_name(sp.name))
-    result.sort()
+            sp_in_level.append(split_workspace_name(sp.name))
+    level_sp_by_names = {entry[1] : entry for entry in sp_in_level}
+    result = []
+    for l in sorted(level_sp_by_names.keys(), key=str.casefold):
+        result.append(level_sp_by_names[l])
     return result
             
 
@@ -207,6 +210,16 @@ def is_current_workspace_empty():
                 return False
     raise Exception("current workspace couldn't be identified")
 
+
+class IfEmpty:
+    def __init__(self):
+        pass
+
+    def __call__(self):
+        if is_current_workspace_empty():
+            return DONE
+        else:
+            return KEEP_GOING
 
 # !SECTION! Dealing with windows
 
