@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-04-16 11:37:33>
+# Time-stamp: <2025-04-17 11:35:02>
 
 
 
@@ -217,10 +217,11 @@ class IfEmpty:
 
     def __call__(self):
         if is_current_workspace_empty():
-            return DONE
-        else:
             return KEEP_GOING
+        else:
+            return DONE
 
+        
 # !SECTION! Dealing with windows
 
 def print_all_windows():
@@ -248,3 +249,7 @@ def focus_window(name):
             
             break
           
+
+if __name__ == "__main__":
+    i = IfEmpty()
+    i()
