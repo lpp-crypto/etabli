@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-04-17 11:35:02>
+# Time-stamp: <2025-05-19 17:37:20>
 
 
 
@@ -11,6 +11,9 @@ from i3ipc import Connection, Event
 from subprocess import Popen
 from time import sleep
 from sys import argv
+import logging
+import os
+from pathlib import Path
 
 
 # !SUBSECTION! Defining global variables and constants 
@@ -24,10 +27,19 @@ NOTIF_TITLE="Etabli prepares..."
 HRULE="⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
 
 
+# !SUBSECTION! Setting up logging 
+
+logging.basicConfig(filename='log.log',
+                    encoding='utf-8',
+                    level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+LOG = logging.getLogger("Etabli")
+
+
 # !SECTION! Dealing with workspaces and their levels
 
 def give_time():
-    sleep(0.5)
+    sleep(0.4)
     
 
 def focus_workspace(name):
@@ -138,6 +150,7 @@ def workspaces_in_current_output():
 
 
 def launch_chain(instructions):
+    LOG.info("launching {}".format(instructions))
     result = KEEP_GOING
     for inst in instructions:
         result = inst()
@@ -152,9 +165,18 @@ class SHexec:
 
     def __call__(self):
         try:
-            Popen(self.command, shell=True)
-            return KEEP_GOING
+            p = Popen(self.command)
+            pid = p.pid
+            success = True
         except:
+            pid = None
+            success = False
+        if success:
+            LOG.info("SHexec( {} ), pid={}".format(self.command,
+                                                 pid))
+            return KEEP_GOING
+        else:
+            LOG.error("Running {} failed!".format(self.command))
             return DONE
 
     def __str__(self):
@@ -165,13 +187,12 @@ class Notification:
     def __init__(self, content):
         self.content = content
         self.inner_command = SHexec(
-            "notify-send '{}' '{}' -t 3000".format(
-                NOTIF_TITLE,
-                self.content
-            ))
+            ["notify-send",  NOTIF_TITLE, self.content, "-t", "3000"]
+        )
 
     def __call__(self):
         self.inner_command()
+        give_time()
 
     def __str__(self):
         return "notification: " + self.content
@@ -246,10 +267,10 @@ def focus_window(name):
         if con.name == name:
             #print("focusing on {} ({}) {}".format(name, con.id, con.window_title))
             SWAY.command("[con_id={}] focus".format(con.id))
-            
             break
           
 
 if __name__ == "__main__":
-    i = IfEmpty()
-    i()
+    s = SHexec(["firefox"])
+    s()
+    print("bla\n\nbla\nbla")

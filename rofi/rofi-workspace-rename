@@ -1,7 +1,10 @@
-#!/usr/bin/sh
+#!/usr/bin/zsh
 
 OLD_NAME=$(python3 ~/etabli/etabli.py current_workspace)
-NEW_NAME=$(rofi -dmenu -i -p "Enter new name (old was $OLD_NAME)")
+LEVEL=$(python3 ~/etabli/etabli.py current_level)
+NEW_NAME=$(python3 ~/etabli/etabli.py prepare | rofi -dmenu -i  -config ~/.config/rofi/rofi.rasi -p  "Enter new name (old was \`$OLD_NAME\`)" -filter $LEVEL/ -l 0 | awk -F " " '{print $NF}')
+
+
 if [[ $NEW_NAME ]]; then
     swaymsg rename workspace $OLD_NAME to $NEW_NAME
 else

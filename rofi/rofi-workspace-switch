@@ -2,9 +2,10 @@
 
 WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
 echo $WORKSPACES
-SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i -p "Go to workspace")
+SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i  -config ~/.config/rofi/rofi.rasi -p  "Go to workspace" | awk -F " " '{print $NF}')
 if [[ $SELECTED_WORKSPACE ]]; then
     swaymsg workspace "$SELECTED_WORKSPACE"
 else
     echo "not doing anything"
+
 fi

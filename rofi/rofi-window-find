@@ -1,0 +1,15 @@
+#!/usr/bin/zsh
+
+WINDOWS=$(python3 ~/etabli/etabli.py list_windows)
+echo $WINDOWS
+SELECTED_DATA=$(echo $WINDOWS | rofi -dmenu -i  -config ~/.config/rofi/rofi.rasi -p  "Select window")
+if [[ $SELECTED_DATA ]]; then
+    SELECTED_WORKSPACE=$(echo -n $SELECTED_DATA | cut -f 1)
+    SELECTED_WINDOW=$(echo -n $SELECTED_DATA | cut -f 2)
+    echo $SELECTED_WORKSPACE
+    echo $SELECTED_WINDOW
+    swaymsg workspace "$SELECTED_WORKSPACE"
+    python3 ~/etabli/etabli.py focus_window "$SELECTED_WINDOW"
+else
+    echo "not doing anything"
+fi
