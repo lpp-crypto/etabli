@@ -20,7 +20,7 @@ class StartEmacsServer:
             daemon_name = self.daemon_name
         if daemon_name not in EDITOR_SESSIONS:
             cmd = self.editor + self.additional_args
-            cmd += ["--daemon={}".format(self.daemon_name)] 
+            cmd += ["--daemon={}".format(daemon_name)] 
             try:
                 p = Popen(cmd)
                 EDITOR_SESSIONS[daemon_name] = p.pid
@@ -60,6 +60,6 @@ launch_table = {
 
 
 if __name__ == "__main__":
-    s = StartEmacsServer(daemon_name="test1")
+    s = StartEmacsServer(additional_args=["--funcall=capture-theme"])
     s()
     LOG.info("bleeeh")
