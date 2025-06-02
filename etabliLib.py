@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-05-29 12:21:05>
+# Time-stamp: <2025-06-02 22:28:37>
 
 
 
@@ -37,10 +37,6 @@ LOG = logging.getLogger(__name__)
 
 
 # !SECTION! Dealing with workspaces and their levels
-
-def give_time():
-    sleep(0.4)
-    
 
 def focus_workspace(name):
     SWAY.command("workspace {}".format(name))
@@ -145,9 +141,31 @@ def workspaces_in_current_output():
 
 
 
+def name_workspace_in_level(amount):
+    current_name = current_workspace_name()
+    current, index = split_workspace_name(current_name)
+    current_level = get_level(current)
+    next_space = current_level[
+        (current_level.index((current, index)) + amount) % len(current_level)
+    ]
+    return format_workspace_name(next_space[0], next_space[1])
+
+
+def name_next_workspace_in_level():
+    return name_workspace_in_level(1)
+
+    
+def name_prev_workspace_in_level():
+    return name_workspace_in_level(-1)
+
+
 
 # !SECTION! Preparing workspaces/full levels
 
+
+def give_time():
+    sleep(0.4)
+    
 
 def launch_chain(instructions):
     LOG.info("launching {}".format(instructions))

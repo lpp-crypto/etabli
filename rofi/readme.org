@@ -68,17 +68,18 @@ else
 fi
 #+END_SRC
 ** Sending container
-Basically identical to the [[*Switching][previous script]], but this one sends the
-focused window there.
+*** To a specific workspace 
+Basically identical to the [[*Switching][previous script]], but this one sends the focused window there.
 
-After sending the container, we "follow" it by also switching the
-workspace.
+After sending the container, we "follow" it by also switching the workspace.
+
 #+BEGIN_SRC sh :tangle ./rofi-workspace-send :results output silent :noweb yes
 #!/usr/bin/zsh
 
+
 WORKSPACES=$(<<etabli>> get_workspaces)
 echo $WORKSPACES
-SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Send window to workspace")
+SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Send to workspace" | awk -F " " '{print $NF}')
 if [[ $SELECTED_WORKSPACE ]]; then
     swaymsg move container to workspace "$SELECTED_WORKSPACE"
     swaymsg workspace "$SELECTED_WORKSPACE"
@@ -86,6 +87,22 @@ else
     echo "not doing anything"
 fi
 #+END_SRC
+*** To a nearby workspace in the same level
+Sends the current container to a nearby workspace (previous or next one) in the next level
+
+#+BEGIN_SRC sh :tangle ./rofi-container-level :results output silent :noweb yes
+#!/usr/bin/zsh
+
+if (($1==1)); then
+   WORKSPACE=$(<<etabli>> name_next_workspace_in_level)
+else
+   WORKSPACE=$(<<etabli>> name_previous_workspace_in_level)
+fi
+echo $WORKSPACE
+swaymsg move container to workspace "$WORKSPACE"
+swaymsg workspace "$WORKSPACE"
+#+END_SRC
+
 ** Listing all windows
 This time, we
 #+BEGIN_SRC sh :tangle ./rofi-window-find :results output silent :noweb yes
@@ -112,6 +129,8 @@ To use these scripts, simply add something like the following snippet to your =s
 #+BEGIN_SRC
 bindsym $mod+n exec zsh path/to/rofi_folder/rofi-workspace-rename
 bindsym $mod+b exec zsh path/to/rofi_folder/rofi-workspace-switch
+bindsym $mod+o exec zsh path/to/rofi_folder/rofi-container-level 1
+bindsym $mod+o exec zsh path/to/rofi_folder/rofi-container-level -1
 bindsym $mod+Shift+b exec zsh path/to/rofi_folder/rofi-workspace-send
 #+END_SRC
 

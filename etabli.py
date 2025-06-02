@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-04-17 10:53:15>
+# Time-stamp: <2025-06-02 22:29:27>
 
 from etabliConfig import *
 
@@ -97,6 +97,10 @@ if __name__ == "__main__":
         print(current_workspace_name())
     elif argv[1] == "current_level":
         print(current_level_name())
+    elif argv[1] == "name_next_workspace_in_level":
+        print(name_next_workspace_in_level())
+    elif argv[1] == "name_previous_workspace_in_level":
+        print(name_prev_workspace_in_level())
     elif argv[1] == "prepare":
         print_potential_preparations()
     else:
