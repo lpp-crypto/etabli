@@ -98,7 +98,18 @@ if (($1==1)); then
 else
    WORKSPACE=$(<<etabli>> name_previous_workspace_in_level)
 fi
-echo $WORKSPACE
+echo "$WORKSPACE"
+swaymsg move container to workspace "$WORKSPACE"
+swaymsg workspace "$WORKSPACE"
+#+END_SRC
+*** To a new workspace in the same level
+Sends the current container to a nearby workspace (previous or next one) in the next level
+
+#+BEGIN_SRC sh :tangle ./rofi-container-new-level :results output silent :noweb yes
+#!/usr/bin/zsh
+
+WORKSPACE=$(<<etabli>> name_new_workspace_in_level)
+echo "$WORKSPACE"
 swaymsg move container to workspace "$WORKSPACE"
 swaymsg workspace "$WORKSPACE"
 #+END_SRC

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-02 22:28:37>
+# Time-stamp: <2025-06-02 23:24:07>
 
 
 
@@ -115,7 +115,7 @@ def prev_workspace_in_level():
 def new_workspace_in_level():
     current, index = split_workspace_name(current_workspace_name())
     current_level = get_level(current)
-    for i in range(0, len(current_level)+1):
+    for i in range(1, len(current_level)+1):
         if (current, str(i)) not in current_level:
             focus_workspace(format_workspace_name(current, str(i)))
             break
@@ -157,6 +157,14 @@ def name_next_workspace_in_level():
     
 def name_prev_workspace_in_level():
     return name_workspace_in_level(-1)
+
+        
+def name_new_workspace_in_level():
+    current, index = split_workspace_name(current_workspace_name())
+    current_level = get_level(current)
+    for i in range(1, len(current_level)+1):
+        if (current, str(i)) not in current_level:
+            return format_workspace_name(current, str(i))
 
 
 
