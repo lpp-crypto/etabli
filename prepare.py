@@ -5,6 +5,7 @@
 from etabliLib import *
 from etabliConfig import *
 
+
 def maybe_prepare(SWAY, e):
     if is_current_workspace_empty():
         curr = current_workspace_name()
@@ -22,8 +23,10 @@ def maybe_prepare(SWAY, e):
 
     
 if __name__ == "__main__":
+    LOG = logging.getLogger("etabli-prepare")
     LOG.info("initialized prepare daemon (pid={})".format(os.getpid()))
     SWAY.on(Event.WORKSPACE_FOCUS, maybe_prepare)
     SWAY.on(Event.WORKSPACE_RENAME, maybe_prepare)
     SWAY.main()
+    LOG.shutdown()
 

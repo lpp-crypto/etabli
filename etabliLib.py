@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-05-19 17:37:20>
+# Time-stamp: <2025-05-29 12:21:05>
 
 
 
@@ -33,7 +33,7 @@ logging.basicConfig(filename='log.log',
                     encoding='utf-8',
                     level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-LOG = logging.getLogger("Etabli")
+LOG = logging.getLogger(__name__)
 
 
 # !SECTION! Dealing with workspaces and their levels
