@@ -60,6 +60,6 @@ launch_table = {
 
 
 if __name__ == "__main__":
-    s = StartEmacsServer(additional_args=["--funcall=capture-theme"])
+    s = StartEmacsServer(daemon_name="*", additional_args=["--funcall=capture-theme"])
     s()
     LOG.info("bleeeh")
