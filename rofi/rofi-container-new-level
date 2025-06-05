@@ -1,0 +1,6 @@
+#!/usr/bin/zsh
+
+WORKSPACE=$(python3 ~/etabli/etabli.py name_new_workspace_in_level)
+echo "$WORKSPACE"
+swaymsg move container to workspace "$WORKSPACE"
+swaymsg workspace "$WORKSPACE"
