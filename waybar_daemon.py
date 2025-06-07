@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from etabli import *
+from sys import argv
 
 
 # !SECTION! Styling the output
@@ -16,7 +17,7 @@ REGULAR_COLOR = "#252525"
 REGULAR_LEVEL_COLOR = "#707070"
 
 # -- separators
-LEVEL_SEPARATOR = "<span color='{}'>⋅</span>".format(SEPARATOR_COLOR)
+LEVEL_SEPARATOR = "" #"<span color='{}'>⋅</span>".format(SEPARATOR_COLOR)
 
 # -- decorating functions
 def weight_selector(active):
@@ -25,19 +26,28 @@ def weight_selector(active):
     else:
         return "normal"
 
-def color_selector_workspace(active, in_level=False):
-    if active:
+def color_selector_workspace(focused, in_focused_output, in_level=False):
+    if focused:
         return ACTIVE_COLOR
-    elif in_level:
+    elif in_focused_output:
+        if in_level:
+            return REGULAR_COLOR
+        else:
+            return REGULAR_LEVEL_COLOR
+    else:
+        if in_level:
+            return REGULAR_LEVEL_COLOR
+        else:
+            return SEPARATOR_COLOR
+            
+
+def color_selector_level(focused, in_focused_output):
+    if focused:
+        return ACTIVE_LEVEL_COLOR
+    elif in_focused_output:
         return REGULAR_COLOR
     else:
         return REGULAR_LEVEL_COLOR
-
-def color_selector_level(active):
-    if active:
-        return ACTIVE_LEVEL_COLOR
-    else:
-        return REGULAR_COLOR
 
     
 # !SUBSECTION! Styling an entire level
@@ -47,34 +57,36 @@ def pretty_level(lev, indices, current):
 
     - `lev` is the name of the level (string),
     - `indices` is a list containing its workspaces, and
-    - `current` is the current workspace as pair (level, index)
+    - `current` is the current workspace as a pair (level, index)
     """
     if len(indices) == 1: # case of a single workspace level
-        active = (current[0] == lev)
+        focused = (current[0] == lev)
         return " <span weight='{}' color='{}'>{}</span> ".format(
             weight_selector(True),
-            color_selector_workspace(active, in_level=True),
+            color_selector_workspace(focused,
+                                     current[2],
+                                     in_level=True),
             lev
         )
     else:
-        active_level = (lev == current[0])
-        result = "<span color='{}'> [</span>".format(
-            ACTIVE_COLOR if (active_level) else SEPARATOR_COLOR
-        )
+        visible = (lev == current[0])
+        if current[2] and visible:
+            delimiter_color = ACTIVE_COLOR
+        else:
+            delimiter_color = SEPARATOR_COLOR
+        result = "<span color='{}'> [</span>".format(delimiter_color)
         result += "<span style='italic' color='{}'>{}</span>".format(
-            color_selector_level(active_level),
+            color_selector_level(visible, current[2]),
             lev
         )
         for index in sorted(indices, key=str.casefold):
-            active =  (lev == current[0] and index == current[1])
+            focused =  (lev == current[0] and index == current[1])
             result += "<span weight='{}' color='{}'> {} </span>".format(
-                weight_selector(active),
-                color_selector_workspace(active, in_level=active_level),
+                weight_selector(focused),
+                color_selector_workspace(focused, current[2], in_level=visible),
                 index
             )        
-        result += "<span color='{}'>] </span>".format(
-            ACTIVE_COLOR if (active_level) else SEPARATOR_COLOR
-        )
+        result += "<span color='{}'>] </span>".format(delimiter_color)
         return result
         
 
@@ -83,26 +95,31 @@ def pretty_level(lev, indices, current):
 # Stores the content of all the workspaces and stores it in an easy to use data structure.
     
 class Etabli:
-    def __init__(self, wm):
+    def __init__(self, wm, output):
         self.wm = wm
+        self.output = output
 
         
-    def set_state_from_wm(self, output=None):
+    def set_state_from_wm(self):
         self.levels = {}
         self.current = [None, None]
         for sp in self.wm.get_workspaces():
-            if output == None or sp.output == output:
+            if sp.output == self.output:
                 name = sp.name
                 lev, index = split_workspace_name(name)
                 if lev in self.levels.keys():
                     self.levels[lev].append(index)
                 else:
                     self.levels[lev] = [index]
+                # figuring out the visible/focused workspace
                 if sp.focused:
-                    self.current = [lev, index]
+                    self.current = [lev, index, True]
+                elif sp.visible:
+                    self.current = [lev, index, False]
+
                 
 
-    def html_formatted(self):
+    def pango_formatted(self):
         result = ""
         all_levels = list(self.levels.keys())
         all_levels.sort(key=str.casefold)
@@ -115,7 +132,7 @@ class Etabli:
 
     
 def print_waybar_input(eta):
-    """Outputs on stdout the output of eta.html_formatted as a json
+    """Outputs on stdout the output of eta.pango_formatted as a json
     formatted string containing all that waybar needs. It in
     particular sets the CSS class to be "custom-etabli".
 
@@ -123,17 +140,9 @@ def print_waybar_input(eta):
     content.
 
     """
-    current_output = None
-    for o in SWAY.get_outputs():
-        if o.focused:
-            current_output = o.name
-            break
-    if current_output == None:
-        raise Exception("no active output found!")
-    else:
-        eta.set_state_from_wm(output=current_output)
-        output = '"text" : "{}", "tooltip": false, "percentage": 0.0, "class" : "custom-etabli"'.format(eta.html_formatted())
-        print( '{' + output + '}', flush=True)
+    eta.set_state_from_wm()
+    output = '"text" : "{}", "tooltip": false, "percentage": 0.0, "class" : "custom-etabli"'.format(eta.pango_formatted())
+    print( '{' + output + '}', flush=True)
 
     
 def wrapped_printing(SWAY, e):
@@ -147,7 +156,7 @@ def wrapped_printing(SWAY, e):
 # !SECTION! Main function 
 
 if __name__ == "__main__":
-    MAIN_ETABLI = Etabli(SWAY) # setting up global variable
+    MAIN_ETABLI = Etabli(SWAY, argv[1]) # setting up global variable
     # re-printing is triggered by a change of workspace, and a change of workspace name.
     SWAY.on(Event.WORKSPACE_FOCUS, wrapped_printing)
     SWAY.on(Event.WORKSPACE_RENAME, wrapped_printing)

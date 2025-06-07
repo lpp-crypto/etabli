@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-02 23:24:07>
+# Time-stamp: <2025-06-07 16:36:08>
 
 
 
@@ -115,7 +115,7 @@ def prev_workspace_in_level():
 def new_workspace_in_level():
     current, index = split_workspace_name(current_workspace_name())
     current_level = get_level(current)
-    for i in range(1, len(current_level)+1):
+    for i in range(1, len(current_level)+2):
         if (current, str(i)) not in current_level:
             focus_workspace(format_workspace_name(current, str(i)))
             break
@@ -230,6 +230,7 @@ class Tiling:
         self.config = config
 
     def process_tiles(self, entry):
+        give_time()
         if isinstance(entry, list):
             for tile in entry:
                 self.process_tiles(tile)
