@@ -81,12 +81,12 @@ def pretty_level(lev, indices, current):
         )
         for index in sorted(indices, key=str.casefold):
             focused =  (lev == current[0] and index == current[1])
-            result += "<span weight='{}' color='{}'> {} </span>".format(
+            result += "<span weight='{}' color='{}'> {}</span>".format(
                 weight_selector(focused),
                 color_selector_workspace(focused, current[2], in_level=visible),
                 index
             )        
-        result += "<span color='{}'>] </span>".format(delimiter_color)
+        result += "<span color='{}'>]</span>".format(delimiter_color)
         return result
         
 
