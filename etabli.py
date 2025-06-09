@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-05 18:05:03>
+# Time-stamp: <2025-06-09 17:12:25>
 
 from etabliConfig import *
 
@@ -46,6 +46,15 @@ def print_workspaces():
     for n in names:
         print(n)
     print_potential_preparations()
+
+    
+def get_level_variable(key):
+    with etabli_shelf() as s:
+        print(s.get(current_level_name(), key))
+    
+def set_level_variable(key, val):
+    with etabli_shelf() as s:
+        s.set(current_level_name(), key, val)
     
 
 # !SECTION! Main program
@@ -106,6 +115,11 @@ if __name__ == "__main__":
         print(name_new_workspace_in_level())
     elif argv[1] == "rename_current_workspace":
         print(rename_workspace_by_guessing())
+    # etabli shelf
+    elif argv[1] == "get_level_variable":
+        get_level_variable(argv[2])
+    elif argv[1] == "set_level_variable":
+        set_level_variable(argv[2], argv[3])
     # prepare
     elif argv[1] == "prepare":
         print_potential_preparations()

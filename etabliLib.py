@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-07 16:36:08>
+# Time-stamp: <2025-06-09 17:16:18>
 
 
 
 # !SECTION! Set up
 
-# !SUBSECTION! Importing modules 
+# !SUBSECTION! Importing modules
 
 from i3ipc import Connection, Event
 from subprocess import Popen
@@ -14,7 +14,7 @@ from sys import argv
 import logging
 import os
 from pathlib import Path
-
+import pickle
 
 # !SUBSECTION! Defining global variables and constants 
 
@@ -25,6 +25,9 @@ DONE = False
 
 NOTIF_TITLE="Etabli prepares..."
 HRULE="⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+
+
+MAIN_SHELF_PATH = Path.home() / "etabli/shelf/db"
 
 
 # !SUBSECTION! Setting up logging 
@@ -62,6 +65,17 @@ def current_level_name():
                 return sp.name
     raise Exception("somehow, no workspace was found!")
     
+
+def is_current_workspace_empty():
+    root = SWAY.get_tree()
+    for con in root:
+        if con.name == current_workspace_name():
+            if len(con.descendants()) == 0:
+                return True
+            else:
+                return False
+    raise Exception("current workspace couldn't be identified")
+
 
 # !SUBSECTION! Dealing with levels
 
@@ -168,8 +182,93 @@ def name_new_workspace_in_level():
 
 
 
-# !SECTION! Preparing workspaces/full levels
+        
+# !SECTION! Dealing with windows
 
+def print_all_windows():
+    root = SWAY.get_tree()
+    rows = []
+    for con in root:
+        if len(con.descendants()) == 0:
+            rows.append([con.workspace().name, con.name])
+    rows.sort()
+    max_length = 0
+    for x in rows:
+        max_length = max(max_length, len(x[0]))
+    template = "{:" + str(max_length) + "s}\t{}"
+    for x in rows:
+        print(template.format(x[0], x[1]))
+
+        
+def focus_window(name):
+    root = SWAY.get_tree()
+    rows = []
+    for con in root:
+        if con.name == name:
+            #print("focusing on {} ({}) {}".format(name, con.id, con.window_title))
+            SWAY.command("[con_id={}] focus".format(con.id))
+            break
+
+# !SECTION! =Prepare= utilities
+
+
+
+# !SUBSECTION! Attaching variables to levels
+
+class EtabliShelf:
+    def __init__(self, shelf_path):
+        self.path = shelf_path
+        with open(self.path, "rb") as file:
+            try:
+                self.db = pickle.load(file)
+            except:
+                self.db = {}
+
+            
+    def __enter__(self):
+        return self
+
+    
+    def save(self):
+        with open(self.path, "wb") as file:
+            pickle.dump(self.db, file)
+            file.flush()
+
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.save()
+        
+                
+    def __call__(self, lev):
+        if lev in self.db.keys():
+            return self.db[lev]
+        else:
+            return {}
+
+    
+    def get(self, lev, key):
+        if lev not in self.db.keys():
+            return None
+        elif key not in self.db[lev]:
+            return None
+        else:
+            return self.db[lev][key]
+
+        
+    def set(self, lev, key, val):
+        str_key = str(key)
+        if lev not in self.db.keys():
+            self.db[lev] = {str_key: val}
+        elif val == "None":
+            del self.db[lev][str_key]
+
+            
+def etabli_shelf():
+    return EtabliShelf(MAIN_SHELF_PATH)
+
+
+
+# !SUBSECTION! Preparing applications 
 
 def give_time():
     sleep(0.4)
@@ -179,7 +278,7 @@ def launch_chain(instructions):
     LOG.info("launching {}".format(instructions))
     result = KEEP_GOING
     for inst in instructions:
-        result = inst()
+        result = inst(result)
         if result == DONE:
             return DONE
     return KEEP_GOING
@@ -189,7 +288,7 @@ class SHexec:
     def __init__(self, command):
         self.command = command
 
-    def __call__(self):
+    def __call__(self, dummy):
         try:
             p = Popen(self.command)
             pid = p.pid
@@ -216,7 +315,7 @@ class Notification:
             ["notify-send",  NOTIF_TITLE, self.content, "-t", "3000"]
         )
 
-    def __call__(self):
+    def __call__(self, dummy):
         self.inner_command()
         give_time()
 
@@ -244,60 +343,35 @@ class Tiling:
         else:
             entry()
     
-    def __call__(self):
+    def __call__(self, dummy):
         self.process_tiles(self.config)
-
-
-def is_current_workspace_empty():
-    root = SWAY.get_tree()
-    for con in root:
-        if con.name == current_workspace_name():
-            if len(con.descendants()) == 0:
-                return True
-            else:
-                return False
-    raise Exception("current workspace couldn't be identified")
 
 
 class IfEmpty:
     def __init__(self):
         pass
 
-    def __call__(self):
+    def __call__(self, dummy):
         if is_current_workspace_empty():
             return KEEP_GOING
         else:
             return DONE
 
-        
-# !SECTION! Dealing with windows
+class SetLevelVar:
+    def __init__(self, key):
+        self.key = key
 
-def print_all_windows():
-    root = SWAY.get_tree()
-    rows = []
-    for con in root:
-        if len(con.descendants()) == 0:
-            rows.append([con.workspace().name, con.name])
-    rows.sort()
-    max_length = 0
-    for x in rows:
-        max_length = max(max_length, len(x[0]))
-    template = "{:" + str(max_length) + "s}\t{}"
-    for x in rows:
-        print(template.format(x[0], x[1]))
+    def __call__(self, val):
+        with etabli_shelf() as e:
+            e.set(current_level_name(), self.key, val)
 
-        
-def focus_window(name):
-    root = SWAY.get_tree()
-    rows = []
-    for con in root:
-        if con.name == name:
-            #print("focusing on {} ({}) {}".format(name, con.id, con.window_title))
-            SWAY.command("[con_id={}] focus".format(con.id))
-            break
-          
+
+
+# !SECTION!  Main function (for testing only)
 
 if __name__ == "__main__":
-    s = SHexec(["firefox"])
-    s()
-    print("bla\n\nbla\nbla")
+    with EtabliShelf(Path.home() / "etabli/shelf/db") as e:
+        cur = current_level_name()
+        e.set(cur, os.getpid(), "bla")
+        print(e(cur))
+    #e.erase()

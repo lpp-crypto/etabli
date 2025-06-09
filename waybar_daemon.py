@@ -92,19 +92,38 @@ def pretty_level(lev, indices, current):
 
 # !SECTION! The Etabli class
 
-# Stores the content of all the workspaces and stores it in an easy to use data structure.
-    
+  
 class Etabli:
+    """Stores the content of all the workspaces associated to a given
+    output and stores it in an easy to use data structure.
+
+    """
     def __init__(self, wm, output):
+        """Intializes an Etabli instance;
+
+        `wm` is the i3ipc connection to use
+        `output` is either `None` or the name of a specific output.
+        
+        """
         self.wm = wm
         self.output = output
 
         
     def set_state_from_wm(self):
+        """Parses the list of workspaces and stores it int he internal
+        state of the object.
+
+        If `self.output` is set to `None`, then the workspaces on all
+        outputs will be displayed. Otherwise, only those intended to
+        appear on the given workspace are taken into account.
+
+        """
         self.levels = {}
         self.current = [None, None]
+        self.focused = None
+        self.visible = None
         for sp in self.wm.get_workspaces():
-            if sp.output == self.output:
+            if (self.output) == None or (sp.output == self.output):
                 name = sp.name
                 lev, index = split_workspace_name(name)
                 if lev in self.levels.keys():
@@ -113,13 +132,18 @@ class Etabli:
                     self.levels[lev] = [index]
                 # figuring out the visible/focused workspace
                 if sp.focused:
+                    self.focused = lev
                     self.current = [lev, index, True]
                 elif sp.visible:
+                    self.visible = lev
                     self.current = [lev, index, False]
-
                 
 
     def pango_formatted(self):
+        """Returns the pango formatted string needed by waybar to
+        display the state of the Etabli.
+
+        """
         result = ""
         all_levels = list(self.levels.keys())
         all_levels.sort(key=str.casefold)
@@ -129,6 +153,19 @@ class Etabli:
             if lev != all_levels[-1] :
                 result += LEVEL_SEPARATOR
         return result
+
+    
+    def current_level_variables(self):
+        result = ""
+        if self.focused != None:
+            with etabli_shelf() as var:
+                local_vars = var(self.focused)
+                for k in local_vars:
+                    result += "({} {}), ".format(k, local_vars[k])
+            if len(result) == 0:
+                return "()"
+            else:
+                return result[:-2]
 
     
 def print_waybar_input(eta):
@@ -141,7 +178,10 @@ def print_waybar_input(eta):
 
     """
     eta.set_state_from_wm()
-    output = '"text" : "{}", "tooltip": false, "percentage": 0.0, "class" : "custom-etabli"'.format(eta.pango_formatted())
+    output = '"text" : "{}", "tooltip": "{}", "percentage": 0.0, "class" : "custom-etabli"'.format(
+        eta.pango_formatted(),
+        eta.current_level_variables(),
+    )
     print( '{' + output + '}', flush=True)
 
     
@@ -156,7 +196,13 @@ def wrapped_printing(SWAY, e):
 # !SECTION! Main function 
 
 if __name__ == "__main__":
-    MAIN_ETABLI = Etabli(SWAY, argv[1]) # setting up global variable
+    if len(argv) > 1:
+        # case where we only want the workspaces that correspond to a specific output
+        MAIN_ETABLI = Etabli(SWAY, argv[1])
+    else:
+        # case where want all workspaces, regardless of output
+        MAIN_ETABLI = Etabli(SWAY, None)
+        
     # re-printing is triggered by a change of workspace, and a change of workspace name.
     SWAY.on(Event.WORKSPACE_FOCUS, wrapped_printing)
     SWAY.on(Event.WORKSPACE_RENAME, wrapped_printing)
