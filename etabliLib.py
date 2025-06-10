@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-09 17:16:18>
+# Time-stamp: <2025-06-10 10:31:40>
 
 
 
@@ -218,11 +218,11 @@ def focus_window(name):
 class EtabliShelf:
     def __init__(self, shelf_path):
         self.path = shelf_path
-        with open(self.path, "rb") as file:
-            try:
+        try:
+            with open(self.path, "rb") as file:
                 self.db = pickle.load(file)
-            except:
-                self.db = {}
+        except:
+            self.db = {}
 
             
     def __enter__(self):
@@ -230,7 +230,7 @@ class EtabliShelf:
 
     
     def save(self):
-        with open(self.path, "wb") as file:
+        with open(self.path, "wb+") as file:
             pickle.dump(self.db, file)
             file.flush()
 
