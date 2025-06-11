@@ -161,7 +161,7 @@ class Etabli:
             with etabli_shelf() as var:
                 local_vars = var(self.focused)
                 for k in local_vars:
-                    result += "({} {}), ".format(k, local_vars[k])
+                    result += "({} '{}'), ".format(k, local_vars[k])
             if len(result) == 0:
                 return "()"
             else:

@@ -8,7 +8,6 @@ from stat import S_ISSOCK
 
 EDITOR = ["sh", Path.home() / "new-emacs/scripts/editor"]
 
-EDITOR_SESSIONS = {}
 
 class EmacsServer:
     def __init__(self, daemon_name=None, additional_args=[]):
@@ -21,18 +20,19 @@ class EmacsServer:
             daemon_name = current_level_name()
         else:
             daemon_name = self.daemon_name
-        if daemon_name not in EDITOR_SESSIONS:
-            cmd = EDITOR + self.additional_args
-            cmd += ["--daemon={}".format(daemon_name)] 
-            try:
-                p = Popen(cmd)
-                self.pid = p.pid
-                return self.daemon_name
-            except:
-                print("couldn't start EMACS server {}".format(self.daemon_name))
-        else:
-            print("Server {} is already running".format(self.daemon_name))
-                
+        print("DAEMON NAME: ", daemon_name)
+        cmd = EDITOR + self.additional_args
+        cmd += ["--daemon={}".format(daemon_name)] 
+        try:
+            p = Popen(cmd)
+            self.pid = p.pid
+            print("success!")
+            return daemon_name
+        except:
+            print("couldn't start EMACS server {}".format(self.daemon_name))
+            return None
+
+        
 
 def list_servers():
     # inspired by https://stackoverflow.com/questions/22521440/how-to-obtain-a-list-of-running-emacs-servers-from-a-shell
@@ -48,5 +48,10 @@ def list_servers():
 
 
 
-# !TODO! write waybar daemon that is a given color if there are unsaved buffer in the level's emacs-server
-# useful link: https://emacs.stackexchange.com/questions/28665/print-unquoted-output-to-stdout-from-emacsclient
+# !TODO! write waybar daemon that is a given color if there are
+# ! unsaved buffer in the level's emacs-server useful link:
+# ! https://emacs.stackexchange.com/questions/28665/print-unquoted-output-to-stdout-from-emacsclient
+
+
+if __name__ == "__main__":
+    list_servers()

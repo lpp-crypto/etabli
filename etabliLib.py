@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-10 10:31:40>
+# Time-stamp: <2025-06-11 15:13:06>
 
 
 
@@ -261,25 +261,29 @@ class EtabliShelf:
             self.db[lev] = {str_key: val}
         elif val == "None":
             del self.db[lev][str_key]
-
+        else:
+            self.db[lev][str_key] = val
             
 def etabli_shelf():
     return EtabliShelf(MAIN_SHELF_PATH)
 
 
 
-# !SUBSECTION! Preparing applications 
+# !SUBSECTION! Preparing entire levels
 
 def give_time():
-    sleep(0.4)
+    sleep(0.25)
     
 
 def launch_chain(instructions):
     LOG.info("launching {}".format(instructions))
     result = KEEP_GOING
     for inst in instructions:
+        print(inst)
         result = inst(result)
         if result == DONE:
+            print("early finish")
+            print(inst)
             return DONE
     return KEEP_GOING
 
@@ -288,7 +292,9 @@ class SHexec:
     def __init__(self, command):
         self.command = command
 
+
     def __call__(self, dummy):
+        LOG.debug("calling {}".format(self.command))
         try:
             p = Popen(self.command)
             pid = p.pid
@@ -297,11 +303,10 @@ class SHexec:
             pid = None
             success = False
         if success:
-            LOG.info("SHexec( {} ), pid={}".format(self.command,
-                                                 pid))
+            LOG.info("SHexec( {} ), pid={}".format(self.command, pid))
             return KEEP_GOING
         else:
-            LOG.error("Running {} failed!".format(self.command))
+            LOG.info("Running {} failed!".format(self.command))
             return DONE
 
     def __str__(self):
@@ -316,8 +321,11 @@ class Notification:
         )
 
     def __call__(self, dummy):
-        self.inner_command()
-        give_time()
+        try:
+            self.inner_command()
+        except:
+            LOG.info("'{}' failed".format(self.__str__()))
+        return KEEP_GOING
 
     def __str__(self):
         return "notification: " + self.content
@@ -329,17 +337,10 @@ class Tiling:
         self.config = config
 
     def process_tiles(self, entry):
-        give_time()
-        if isinstance(entry, list):
+        if isinstance(entry, (list, tuple)):
             for tile in entry:
-                self.process_tiles(tile)
                 give_time()
-                SWAY.command("splitv")
-        elif isinstance(entry, tuple):
-            for tile in entry:
                 self.process_tiles(tile)
-                give_time()
-                SWAY.command("splith")
         else:
             entry()
     
@@ -352,6 +353,7 @@ class IfEmpty:
         pass
 
     def __call__(self, dummy):
+        give_time()
         if is_current_workspace_empty():
             return KEEP_GOING
         else:
@@ -362,16 +364,23 @@ class SetLevelVar:
         self.key = key
 
     def __call__(self, val):
-        with etabli_shelf() as e:
-            e.set(current_level_name(), self.key, val)
+        print("setting '{}' to '{}'".format(self.key, val))
+        try:
+            with etabli_shelf() as e:
+                e.set(current_level_name(), self.key, val)
+                return KEEP_GOING
+        except:
+            return DONE
 
 
 
 # !SECTION!  Main function (for testing only)
 
 if __name__ == "__main__":
-    with EtabliShelf(Path.home() / "etabli/shelf/db") as e:
-        cur = current_level_name()
-        e.set(cur, os.getpid(), "bla")
-        print(e(cur))
-    #e.erase()
+    # with EtabliShelf(Path.home() / "etabli/shelf/db") as e:
+    #     cur = current_level_name()
+    #     e.set(cur, os.getpid(), "bla")
+    #     print(e(cur))
+    # #e.erase()
+    n = Notification("bla bla")
+    n("")
