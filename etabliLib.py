@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-11 15:13:06>
+# Time-stamp: <2025-06-12 18:51:26>
 
 
 
@@ -342,7 +342,7 @@ class Tiling:
                 give_time()
                 self.process_tiles(tile)
         else:
-            entry()
+            entry(None)
     
     def __call__(self, dummy):
         self.process_tiles(self.config)
