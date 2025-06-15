@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-12 18:51:26>
+# Time-stamp: <2025-06-15 15:46:47>
 
 
 
@@ -248,9 +248,9 @@ class EtabliShelf:
     
     def get(self, lev, key):
         if lev not in self.db.keys():
-            return None
+            return ""
         elif key not in self.db[lev]:
-            return None
+            return ""
         else:
             return self.db[lev][key]
 
@@ -259,7 +259,7 @@ class EtabliShelf:
         str_key = str(key)
         if lev not in self.db.keys():
             self.db[lev] = {str_key: val}
-        elif val == "None":
+        elif val == "":
             del self.db[lev][str_key]
         else:
             self.db[lev][str_key] = val

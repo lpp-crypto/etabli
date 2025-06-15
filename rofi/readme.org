@@ -134,6 +134,31 @@ else
 fi
 #+END_SRC
 
+** Using level variables
+Setting a level variable is simple, we simply need to run the =etabli= command with some arguments.
+
+
+#+BEGIN_SRC sh :tangle ./rofi-set-level-directory :results output silent :noweb yes
+#!/usr/bin/zsh
+
+CURRENT_DIRECTORY=$(<<etabli>> get_level_variable directory)
+if [[ $CURRENT_DIRECTORY == "" ]]; then
+    EXPLAIN="New level directory"
+else
+    EXPLAIN="New level directory (old was \`$CURRENT_DIRECTORY\`)"
+fi
+
+NEW_DIRECTORY=$(find ~/ -type d -not -path "*/.*" -not -path "*miniforge*" | rofi -dmenu -i)
+echo $NEW_DIRECTORY
+if [[ $NEW_DIRECTORY ]]; then
+    <<etabli>> set_level_variable directory "$NEW_DIRECTORY"
+else
+    echo "doing nothing"
+fi
+#+END_SRC
+
+
+# SELECTED_WORKSPACE=$(<<dmenu-command>> "default directory")
 * Usage
 To use these scripts, simply add something like the following snippet to your =sway= configuration, where =path/to/rofi_folder/= needs to be replaced by the actual path to this folder.
 
