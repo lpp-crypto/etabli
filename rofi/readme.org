@@ -21,7 +21,7 @@ If you intend to use =rofi= as your prompt, the following line will start it in 
 
 #+NAME: dmenu-command
 #+BEGIN_SRC sh
-rofi -dmenu -i  -config ~/.config/rofi/rofi.rasi -p 
+rofi -dmenu -i -monitor -1 -config ~/.config/rofi/rofi.rasi -p 
 #+END_SRC
 
 Alternatively, rename the following snippet to =dmenu-command= to replace =rofi= with =kickoff=. You can basically use any =dmenu=-style tool, provided that you can create a command-line whereby the list of choices is specified as a newline separated list sent through =stdin=, and where the prompt can be appended to the end of the string.
