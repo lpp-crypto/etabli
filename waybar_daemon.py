@@ -106,7 +106,14 @@ class Etabli:
         
         """
         self.wm = wm
-        self.output = output
+        if output == None:
+            self.output = None
+        elif output[0] != "-":
+            self.output = output
+            self.take = True
+        else:
+            self.output = output[1:]
+            self.take = False
 
         
     def set_state_from_wm(self):
@@ -123,7 +130,15 @@ class Etabli:
         self.focused = None
         self.visible = None
         for sp in self.wm.get_workspaces():
-            if (self.output) == None or (sp.output == self.output):
+            if (self.output) == None:
+                valid = True
+            elif self.take and self.output in sp.output:
+                valid = True
+            elif (not self.take) and (self.output not in sp.output):
+                valid = True
+            else:
+                valid = False
+            if  valid:
                 name = sp.name
                 lev, index = split_workspace_name(name)
                 if lev in self.levels.keys():

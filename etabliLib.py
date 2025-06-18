@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-11 16:32:35>
 
 
 
@@ -248,9 +247,9 @@ class EtabliShelf:
     
     def get(self, lev, key):
         if lev not in self.db.keys():
-            return None
+            return ""
         elif key not in self.db[lev]:
-            return None
+            return ""
         else:
             return self.db[lev][key]
 
@@ -259,7 +258,7 @@ class EtabliShelf:
         str_key = str(key)
         if lev not in self.db.keys():
             self.db[lev] = {str_key: val}
-        elif val == "None":
+        elif val == "":
             del self.db[lev][str_key]
         else:
             self.db[lev][str_key] = val
@@ -342,7 +341,7 @@ class Tiling:
                 give_time()
                 self.process_tiles(tile)
         else:
-            entry()
+            entry(None)
     
     def __call__(self, dummy):
         self.process_tiles(self.config)
