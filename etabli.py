@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-06-09 17:12:25>
+# Time-stamp: <2025-07-01 16:08:24>
 
 from etabliConfig import *
 
@@ -92,6 +92,10 @@ if __name__ == "__main__":
         prev_workspace_in_level()
     elif argv[1] == "new_workspace_in_level":
         new_workspace_in_level()
+    elif argv[1] == "next_level":
+        next_level()
+    elif argv[1] == "prev_level":
+        prev_level()
     # dealing with windows
     elif argv[1] == "list_windows":
         print_all_windows()
