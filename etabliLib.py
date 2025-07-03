@@ -108,7 +108,9 @@ def get_level(name):
     return result
             
 
-# !SUBSECTION! Cycling within a level of workspaces
+# !SUBSECTION! Cycling workspaces
+
+# !SUBSUBSECTION!  Within a level
 
 def cycle_workspace_in_level(amount):
     current_name = current_workspace_name()
@@ -135,6 +137,38 @@ def new_workspace_in_level():
         if (current, str(i)) not in current_level:
             focus_workspace(format_workspace_name(current, str(i)))
             break
+
+# !SUBSUBSECTION! Whole levels 
+
+# !TODO! the Etabli class from [[./waybar_daemon.py]] should probably be moved here, and used for the cycling operations
+
+def cycle_level(amount):
+    levels_in_output = {}
+    c_o = current_output()
+    for sp in SWAY.get_workspaces():
+        if sp.output == c_o:
+            lev, index = split_workspace_name(sp.name)
+            if lev in levels_in_output:
+                levels_in_output[lev].append(sp.name)
+            else:
+                levels_in_output[lev] = [ sp.name ]
+        if sp.focused:
+            c_s = sp.name
+    sorted_levels = []
+    c_i = None
+    for lev in sorted(levels_in_output.keys(), key=str.casefold):
+        sorted_levels.append(levels_in_output[lev])
+        sorted_levels[-1].sort()
+        if c_s in sorted_levels[-1]:
+            c_i = len(sorted_levels) - 1
+    focus_workspace(sorted_levels[(c_i + amount) % len(sorted_levels)][0])
+
+    
+def next_level():
+    cycle_level(1)
+    
+def prev_level():
+    cycle_level(-1)
 
 
 # !SUBSECTION! Sorting workspaces
