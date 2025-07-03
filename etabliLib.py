@@ -78,6 +78,9 @@ def is_current_workspace_empty():
 
 # !SUBSECTION! Dealing with levels
 
+# !TODO! functions to cycle through levels 
+
+
 def format_workspace_name(name, index):
     if index == "0":
         return name
@@ -208,6 +211,10 @@ def focus_window(name):
             SWAY.command("[con_id={}] focus".format(con.id))
             break
 
+# !TODO!  add tools to automatically set whether the next window will be added horizontally or vertically
+
+
+        
 # !SECTION! =Prepare= utilities
 
 
@@ -373,7 +380,7 @@ class SetLevelVar:
 
 
 
-# !SECTION!  Main function (for testing only)
+# !SECTION! Main function (for testing only)
 
 if __name__ == "__main__":
     # with EtabliShelf(Path.home() / "etabli/shelf/db") as e:
