@@ -7,90 +7,105 @@ from sys import argv
 # !SECTION! Styling the output
 
 
-# !SUBSECTION! Basic constants and helper functions 
+# !SUBSECTION! Color scheme
 
-# -- colors
-ACTIVE_COLOR = "#C00000"
-ACTIVE_LEVEL_COLOR = "#883333"
-SEPARATOR_COLOR = "#DDDDDD"
-REGULAR_COLOR = "#252525"
-REGULAR_LEVEL_COLOR = "#707070"
 
-# -- separators
-LEVEL_SEPARATOR = "" #"<span color='{}'>⋅</span>".format(SEPARATOR_COLOR)
+FOCUSED = 1
+FOCUSED_LEVEL = 2
+VISIBLE_LEVEL_OTHER_OUTPUT = 3
+NOT_VISIBLE_CURRENT_OUTPUT = 4
+NOT_VISIBLE_OTHER_OUTPUT = 5
 
-# -- decorating functions
-def weight_selector(active):
-    if active:
-        return "normal" # <-- change this line to "bold" to have the current workspace be bold
-    else:
-        return "normal"
 
-def color_selector_workspace(focused, in_focused_output, in_level=False):
-    if focused:
-        return ACTIVE_COLOR
-    elif in_focused_output:
-        if in_level:
-            return REGULAR_COLOR
-        else:
-            return REGULAR_LEVEL_COLOR
-    else:
-        if in_level:
-            return REGULAR_LEVEL_COLOR
-        else:
-            return SEPARATOR_COLOR
-            
+grey_red_theme = {
+    "sp" : {
+        FOCUSED: "#C00000",
+        FOCUSED_LEVEL: "#252525",
+        VISIBLE_LEVEL_OTHER_OUTPUT:  "#707070",
+        NOT_VISIBLE_CURRENT_OUTPUT: "#707070",
+        NOT_VISIBLE_OTHER_OUTPUT:  "#DDDDDD",
+    },
+    "lvl" : {
+        FOCUSED_LEVEL: "#883333",
+        VISIBLE_LEVEL_OTHER_OUTPUT:  "#883333",
+        NOT_VISIBLE_CURRENT_OUTPUT: "#252525",
+        NOT_VISIBLE_OTHER_OUTPUT:  "#707070",
+    },
+    "sbl" : {
+        FOCUSED_LEVEL: "#C00000",
+        VISIBLE_LEVEL_OTHER_OUTPUT:  "#DDDDDD",
+        NOT_VISIBLE_CURRENT_OUTPUT: "#DDDDDD",
+        NOT_VISIBLE_OTHER_OUTPUT:  "#DDDDDD",
+    },
+    "dlm": ["[", "]"],
+}
 
-def color_selector_level(focused, in_focused_output):
-    if focused:
-        return ACTIVE_LEVEL_COLOR
-    elif in_focused_output:
-        return REGULAR_COLOR
-    else:
-        return REGULAR_LEVEL_COLOR
-
-    
-# !SUBSECTION! Styling an entire level
-
-def pretty_level(lev, indices, current):
-    """Formats the description of a level as a string with HTML spans to make it prettier.
-
-    - `lev` is the name of the level (string),
-    - `indices` is a list containing its workspaces, and
-    - `current` is the current workspace as a pair (level, index)
-    """
-    if len(indices) == 1: # case of a single workspace level
-        focused = (current[0] == lev)
-        return " <span weight='{}' color='{}'>{}</span> ".format(
-            weight_selector(True),
-            color_selector_workspace(focused,
-                                     current[2],
-                                     in_level=True),
-            lev
-        )
-    else:
-        visible = (lev == current[0])
-        if current[2] and visible:
-            delimiter_color = ACTIVE_COLOR
-        else:
-            delimiter_color = SEPARATOR_COLOR
-        result = "<span color='{}'> [</span>".format(delimiter_color)
-        result += "<span style='italic' color='{}'>{}</span>".format(
-            color_selector_level(visible, current[2]),
-            lev
-        )
-        for index in sorted(indices, key=str.casefold):
-            focused =  (lev == current[0] and index == current[1])
-            result += "<span weight='{}' color='{}'> {}</span>".format(
-                weight_selector(focused),
-                color_selector_workspace(focused, current[2], in_level=visible),
-                index
-            )        
-        result += "<span color='{}'>]</span>".format(delimiter_color)
-        return result
-        
+THEME = grey_red_theme
 
 # !SECTION! The Etabli class
+
+class Workspace:
+    def __init__(self, name, level, focused):
+        """
+        Args:
+            name: the name (a string) of the workspace
+            level: the Level instance containing this workspace
+            focused: a boolean that is true if this workspace is visible
+        """
+        self.name = name
+        self.level = level
+        self.focused = focused
+
+    def pango_formatted(self, theme):
+        if self.focused:
+            return " <span color='{}'>{}</span>".format(
+                theme["sp"][FOCUSED],
+                self.name
+            )
+        else:
+            return " <span color='{}'>{}</span>".format(
+                theme["sp"][self.level.visibility],
+                self.name
+            )
+
+
+class Level:
+    def __init__(self, eta, name):
+        self.spaces = {}
+        self.etabli = eta
+        self.name = name
+        self.visibility = None
+
+    def append(self, index, focused, visible):
+        if focused:
+            self.visibility = FOCUSED_LEVEL
+            self.spaces[index] = Workspace(index, self, True)
+        elif visible:
+            self.visibility = VISIBLE_LEVEL_OTHER_OUTPUT
+            self.spaces[index] = Workspace(index, self, True)
+        else:
+            self.spaces[index] = Workspace(index, self, False)
+            
+    def pango_formatted(self, theme):
+        # opening delimiter
+        result = " <span color='{}'>{}</span>".format(
+            theme["sbl"][self.visibility],
+            theme["dlm"][0]
+        )
+        # level name
+        result += "<span color='{}' style='italic'>{}</span>".format(
+            theme["lvl"][self.visibility],
+            self.name
+        )
+        # workspaces names
+        for index in sorted(self.spaces.keys(), key=str.casefold):
+            result += self.spaces[index].pango_formatted(theme)
+        # closing delimiter
+        result += "<span color='{}'>{}</span>".format(
+            theme["sbl"][self.visibility],
+            theme["dlm"][1]
+        )
+        return result
 
   
 class Etabli:
@@ -98,7 +113,7 @@ class Etabli:
     output and stores it in an easy to use data structure.
 
     """
-    def __init__(self, wm, output):
+    def __init__(self, wm, output, theme=grey_red_theme):
         """Intializes an Etabli instance;
 
         `wm` is the i3ipc connection to use
@@ -106,6 +121,7 @@ class Etabli:
         
         """
         self.wm = wm
+        self.theme = theme
         if output == None:
             self.output = None
         elif output[0] != "-":
@@ -126,10 +142,9 @@ class Etabli:
 
         """
         self.levels = {}
-        self.current = [None, None]
-        self.focused = None
-        self.visible = None
+        self.on_current_output = False
         for sp in self.wm.get_workspaces():
+            # checking whether this workspace belong to this etabli
             if (self.output) == None:
                 valid = True
             elif self.take and self.output in sp.output:
@@ -138,21 +153,24 @@ class Etabli:
                 valid = True
             else:
                 valid = False
+            # if it does, we add it to its level (and create the level if need be)
             if  valid:
                 name = sp.name
                 lev, index = split_workspace_name(name)
-                if lev in self.levels.keys():
-                    self.levels[lev].append(index)
-                else:
-                    self.levels[lev] = [index]
-                # figuring out the visible/focused workspace
+                if lev not in self.levels:
+                    self.levels[lev] = Level(self, lev)
+                self.levels[lev].append(index, sp.focused, sp.visible)
                 if sp.focused:
-                    self.focused = lev
-                    self.current = [lev, index, True]
-                elif sp.visible:
-                    self.visible = lev
-                    self.current = [lev, index, False]
-                
+                    self.on_current_output = True
+        # adjusting the visibility of all levels now that we gather all data
+        for lev in self.levels:
+            if self.levels[lev].visibility == None:
+                if self.on_current_output:
+                    self.levels[lev].visibility = NOT_VISIBLE_CURRENT_OUTPUT
+                else:
+                    self.levels[lev].visibility = NOT_VISIBLE_OTHER_OUTPUT
+
+        
 
     def pango_formatted(self):
         """Returns the pango formatted string needed by waybar to
@@ -160,27 +178,24 @@ class Etabli:
 
         """
         result = ""
-        all_levels = list(self.levels.keys())
-        all_levels.sort(key=str.casefold)
-        for lev in all_levels:
-            result += pretty_level(lev, self.levels[lev], self.current)
-            # writing a separator, unless we are at the end
-            if lev != all_levels[-1] :
-                result += LEVEL_SEPARATOR
-        return result
+        for lev in sorted(self.levels.keys(), key=str.casefold):
+            result += self.levels[lev].pango_formatted(self.theme)
+        return result 
 
     
     def current_level_variables(self):
         result = ""
-        if self.focused != None:
-            with etabli_shelf() as var:
-                local_vars = var(self.focused)
-                for k in local_vars:
-                    result += "({} '{}'), ".format(k, local_vars[k])
-            if len(result) == 0:
-                return "()"
-            else:
-                return result[:-2]
+        # !TODO!  fix current_level_variables
+        # if self.focused != None:
+        #     with etabli_shelf() as var:
+        #         local_vars = var(self.focused)
+        #         for k in local_vars:
+        #             result += "({} '{}'), ".format(k, local_vars[k])
+        #     if len(result) == 0:
+        #         return "()"
+        #     else:
+        #         return result[:-2]
+        return result
 
     
 def print_waybar_input(eta):

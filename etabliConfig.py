@@ -6,7 +6,104 @@ from emacsServerHandler import *
 
 
 
-# !SECTION! Describing the mapping between level names and the functions that must be run when they are created
+# !SECTION! Configuration
+
+
+# !SUBSECTION! Style of the waybar widget
+
+
+# !SUBSUBSECTION! Style descriptions
+
+grey_red_theme = {
+    "sp" : {
+        "FOCUSED": "#C00000",
+        "SAME_LEVEL": "#252525",
+        "SAME_OUTPUT":  "#707070",
+        "OTHER_OUTPUT":  "#DDDDDD",
+    },
+    "lvl" : {
+        "FOCUSED": "#883333",
+        "SAME_OUTPUT": "#252525",
+        "OTHER_OUTPUT": "#707070",
+    },
+    "sbl" : {
+        "ACTIVE": "#C00000",
+        "INACTIVE": "#DDDDDD",
+    }
+}
+
+
+thm = grey_red_theme # <---- change this to change the color_scheme
+
+
+# !SUBSUBSECTION! Style application functions
+
+def open_level(level_name, symbol_color, name_color):
+    delimiter = " <span color=\"{}\">[</span>".format(symbol_color)
+    return delimiter + "<span color=\"{}\" style=\"bold\">{}</span>".format(
+        name_color,
+        level_name
+    )
+
+
+def open_visible_level(level_name):
+    return open_level(level_name,
+                      thm["sbl"]["ACTIVE"],
+                      thm["lvl"]["ACTIVE"])
+
+
+def open_current_output_level(level_name):
+    return open_level(level_name,
+                      thm["sbl"]["INACTIVE"],
+                      thm["lvl"]["SAME_OUTPUT"])
+
+
+def open_other_output_level(level_name):
+    return open_level(level_name,
+                      thm["sbl"]["INACTIVE"],
+                      thm["lvl"]["OTHER_OUTPUT"])
+
+
+def close_level(symbol_color):
+    return "<span color=\"{}\">]</span>".format(symbol_color)
+
+
+def close_visible_level():
+    return close_level(thm["sbl"]["ACTIVE"])
+
+
+def close_current_output_level():
+    return close_level(thm["sbl"]["SAME_LEVEL"])
+
+
+def close_other_output_level():
+    return close_level(thm["sbl"]["INACTIVE"])
+
+
+
+def style_workspace(sp_name, color):
+    return "<span color=\"{}\">{}</span>".format(color, sp_name)
+
+
+def current_workspace(sp_name):
+    return style_workspace(thm["sp"]["ACTIVE"], sp_name)
+
+
+def current_level_workspace(sp_name):
+    return style_workspace(thm["sp"]["CURRENT_LEVEL"], sp_name)
+
+
+def same_output_workspace(sp_name):
+    return style_workspace(thm["sp"]["SAME_OUTPUT"], sp_name)
+
+
+def other_output_workspace(sp_name):
+    return style_workspace(thm["sp"]["OTHER_OUTPUT"], sp_name)
+
+
+
+# !SUBSECTION! Describing the mapping between level names and the functions that must be run when they are created
+
 
 launch_table = {
     "firefox" : [IfEmpty(),
@@ -37,7 +134,7 @@ launch_table = {
 
 
 
-# !SECTION!  Suggesting a name for a workspace within a level
+# !SUBSECTION!  Suggesting a name for a workspace within a level
 
 def rename_workspace_by_guessing():
     focused = SWAY.get_tree().find_focused()
