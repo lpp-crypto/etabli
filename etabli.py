@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-07-01 16:31:03>
+# Time-stamp: <2025-07-07 18:42:15>
 
 from etabliConfig import *
 
@@ -65,37 +65,39 @@ def set_level_variable(key, val):
 # !TODO! add a function to rename a level
 
 
-arg_function_map = {
-    "next_workspace" : next_workspace,
-    "prev_workspace" : prev_workspace,
-    "next_workspace_in_level" : next_workspace_in_level,
-    "prev_workspace_in_level" : prev_workspace_in_level,
-    "new_workspace_in_level" : new_workspace_in_level,
-    "list_windows" : print_all_windows,
-    "focus_window" : focus_window
-}
+# arg_function_map = {
+#     "next_workspace" : next_workspace,
+#     "prev_workspace" : prev_workspace,
+#     "next_workspace_in_level" : next_workspace_in_level,
+#     "prev_workspace_in_level" : prev_workspace_in_level,
+#     "new_workspace_in_level" : new_workspace_in_level,
+#     "list_windows" : print_all_windows,
+#     "focus_window" : focus_window
+# }
 
 # !CONTINUE! finish the argv to function dictionnary
 
 
 if __name__ == "__main__":
+    eta = Etabli(SWAY, current_output())
+    eta.set_state_from_wm()
 
     # general cycling
     if argv[1] == "next_workspace":
-        next_workspace()
+        eta.cycle_within_current_output(1)
     elif argv[1] == "prev_workspace":
-        prev_workspace()
+        eta.cycle_within_current_output(-1)
     # by level
     elif argv[1] == "next_workspace_in_level":
-        next_workspace_in_level()
+        eta.cycle_within_current_level(1)
     elif argv[1] == "prev_workspace_in_level":
-        prev_workspace_in_level()
+        eta.cycle_within_current_level(-1)
     elif argv[1] == "new_workspace_in_level":
         new_workspace_in_level()
     elif argv[1] == "next_level":
-        next_level()
+        eta.cycle_level(1)
     elif argv[1] == "prev_level":
-        prev_level()
+        eta.cycle_level(-1)
     # dealing with windows
     elif argv[1] == "list_windows":
         print_all_windows()
