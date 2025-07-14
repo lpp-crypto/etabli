@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2025-07-07 18:42:15>
+# Time-stamp: <2025-07-07 18:47:09>
 
 from etabliConfig import *
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     elif argv[1] == "prev_workspace_in_level":
         eta.cycle_within_current_level(-1)
     elif argv[1] == "new_workspace_in_level":
-        new_workspace_in_level()
+        eta.new_workspace_within_level()
     elif argv[1] == "next_level":
         eta.cycle_level(1)
     elif argv[1] == "prev_level":

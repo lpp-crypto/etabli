@@ -258,23 +258,8 @@ class Etabli:
             index
         )))
 
-    # !SUBSUBSECTION! Cycling workspaces 
-                    
-    def cycle_within_current_level(self, amount):
-        current_level_sorted_indices = self.levels[self.current_level_name].sorted_indices
-        pos = current_level_sorted_indices.index(self.current_index_name)
-        index_name = current_level_sorted_indices[
-            (pos + amount) % len(current_level_sorted_indices)
-        ]
-        self.focus_workspace(self.current_level_name, index_name)
 
-
-    def cycle_level(self, amount):
-        pos = self.sorted_levels.index(self.current_level_name)
-        level_name = self.sorted_levels[
-            (pos + amount) % len(self.sorted_levels)
-        ]
-        self.focus_workspace(level_name, self.levels[level_name].first())
+    # !SUBSUBSECTION! Getters/setters
 
     
     def workspace_super_index(self, name, index):
@@ -302,7 +287,29 @@ class Etabli:
         result_index = self.levels[result_name].index(index_cursor)
         return [result_name, result_index]
 
+
+    def current_level(self):
+        return self.levels[self.current_level_name]
     
+    
+    # !SUBSUBSECTION! Cycling workspaces 
+                    
+    def cycle_within_current_level(self, amount):
+        current_level_sorted_indices = self.levels[self.current_level_name].sorted_indices
+        pos = current_level_sorted_indices.index(self.current_index_name)
+        index_name = current_level_sorted_indices[
+            (pos + amount) % len(current_level_sorted_indices)
+        ]
+        self.focus_workspace(self.current_level_name, index_name)
+
+
+    def cycle_level(self, amount):
+        pos = self.sorted_levels.index(self.current_level_name)
+        level_name = self.sorted_levels[
+            (pos + amount) % len(self.sorted_levels)
+        ]
+        self.focus_workspace(level_name, self.levels[level_name].first())
+
         
     def cycle_within_current_output(self, amount):
         target = self.workspace_super_index(
@@ -312,6 +319,14 @@ class Etabli:
         target = (target + amount) % self.length
         target_name,target_index = self.workspace_from_super_index(target)
         self.focus_workspace(target_name, target_index)
+
+        
+    def new_workspace_within_level(self):
+        index = 0
+        print(self.sorted_levels)
+        while str(index) in self.current_level().spaces:
+            index += 1
+        self.focus_workspace(self.current_level_name, str(index))
 
         
     # !SUBSUBSECTION! Printing

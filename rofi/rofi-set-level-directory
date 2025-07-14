@@ -1,7 +1,7 @@
 #!/usr/bin/zsh
 
 CURRENT_DIRECTORY=$(python3 ~/etabli/etabli.py get_level_variable directory)
-if [[ $CURRENT_DIRECTORY == "None" ]]; then
+if [[ $CURRENT_DIRECTORY == "" ]]; then
     EXPLAIN="New level directory"
 else
     EXPLAIN="New level directory (old was \`$CURRENT_DIRECTORY\`)"
