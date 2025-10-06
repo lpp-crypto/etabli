@@ -12,7 +12,7 @@ The command running the =etabli.py= script must be set here.
 
 #+NAME: etabli
 #+BEGIN_SRC sh
-etabli
+~/.local/bin/etabli
 #+END_SRC
 
 If you intend to use =rofi= as your prompt, the following line will start it in the proper mode. Feel free to customize this line if, for instance, your =rofi= configuration doesn't live in the specified directory.
@@ -40,7 +40,7 @@ We need to grab the name of the current workspace (I use the method given [[http
 
 LEVEL=$(<<etabli>> --current_level)
 OLD_INDEX=$(<<etabli>> --current_index)
-if [[ $OLD_INDEX==0 ]]; then
+if [[ $OLD_INDEX = "0" ]]; then
     OLD_NAME=$LEVEL
 else
     OLD_NAME=$LEVEL/$OLD_INDEX

@@ -1,13 +1,13 @@
 #!/usr/bin/zsh
 
-LEVEL=$(etabli --current_level)
-OLD_INDEX=$(etabli --current_index)
-if [[ $OLD_INDEX==0 ]]; then
+LEVEL=$(~/.local/bin/etabli --current_level)
+OLD_INDEX=$(~/.local/bin/etabli --current_index)
+if [[ $OLD_INDEX = "0" ]]; then
     OLD_NAME=$LEVEL
 else
     OLD_NAME=$LEVEL/$OLD_INDEX
 fi
-NEW_NAME=$(etabli --list_workspaces | rofi -dmenu -i -monitor -1 -config ~/.config/rofi/rofi.rasi -p  "Enter new name (old was \`$OLD_NAME\`)" -filter $LEVEL/ -l 0 | awk -F " " '{print $NF}')
+NEW_NAME=$(~/.local/bin/etabli --list_workspaces | rofi -dmenu -i -monitor -1 -config ~/.config/rofi/rofi.rasi -p  "Enter new name (old was \`$OLD_NAME\`)" -filter $LEVEL/ -l 0 | awk -F " " '{print $NF}')
 echo "---"
 echo $OLD_NAME
 echo $NEW_NAME
