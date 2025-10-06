@@ -1,0 +1,40 @@
+board_path = "~/.etabli_board"
+
+
+[theme]
+
+[theme.sp]
+FOCUSED = "#C00000"
+FOCUSED_LEVEL = "#252525"
+VISIBLE_LEVEL_OTHER_OUTPUT =  "#707070"
+NOT_VISIBLE_CURRENT_OUTPUT = "#707070"
+NOT_VISIBLE_OTHER_OUTPUT =  "#DDDDDD"
+ON_TOP = "underline='single' underline_color='#DDDDDD'"
+
+[theme.lvl]
+FOCUSED_LEVEL = "#881144"
+VISIBLE_LEVEL_OTHER_OUTPUT =  "#881144"
+NOT_VISIBLE_CURRENT_OUTPUT = "#252525"
+NOT_VISIBLE_OTHER_OUTPUT =  "#707070"
+
+[theme.sbl]
+FOCUSED_LEVEL = "#881144"
+VISIBLE_LEVEL_OTHER_OUTPUT =  "#881144"
+NOT_VISIBLE_CURRENT_OUTPUT = "#DDDDDD"
+NOT_VISIBLE_OTHER_OUTPUT =  "#DDDDDD"
+
+[theme.dlm]
+open = "("
+closed = ")"
+
+[theme.brd]
+dlm_color = "#881144"
+key_color = "#707070"
+txt_color = "#252525"
+dlm = " | "
+
+
+[prepare]
+firefox = "firefox"
+comms = ["thunderbird", "signal-desktop --password-store=gnome-libsecret", "chromium-browser https://naro.brute-force.eu/element/#/home"]
+steam = "steam"
