@@ -30,6 +30,7 @@ grey_red_theme = {
         NOT_VISIBLE_CURRENT_OUTPUT: "#DDDDDD",
         NOT_VISIBLE_OTHER_OUTPUT:  "#DDDDDD",
     },
+    # !CONTINUE! check if the current theme is the current one 
     "dlm": ["(", ")"],
 }
 

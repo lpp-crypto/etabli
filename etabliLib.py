@@ -486,7 +486,7 @@ def focus_window(name):
 
 
         
-# !SECTION! =Prepare= utilities
+# !SECTION! Prepare utilities
 
 
 

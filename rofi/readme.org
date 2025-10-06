@@ -12,7 +12,7 @@ The command running the =etabli.py= script must be set here.
 
 #+NAME: etabli
 #+BEGIN_SRC sh
-python3 ~/etabli/etabli.py
+etabli
 #+END_SRC
 
 
@@ -40,7 +40,7 @@ We need to grab the name of the current workspace (I use the method given [[http
 #+BEGIN_SRC sh :tangle ./rofi-workspace-rename :results output silent :noweb yes
 #!/usr/bin/zsh
 
-OLD_NAME=$(<<etabli>> current_workspace)
+OLD_NAME=$(<<etabli>> --current_workspace)
 LEVEL=$(<<etabli>> current_level)
 NEW_NAME=$(<<etabli>> prepare | <<dmenu-command>> "Enter new name (old was \`$OLD_NAME\`)" -filter $LEVEL/ -l 0 | awk -F " " '{print $NF}')
 
@@ -57,7 +57,7 @@ We grab the name of all the workspaces by parsing the output of =swaymsg -t get_
 #+BEGIN_SRC sh :tangle ./rofi-workspace-switch :results output silent :noweb yes
 #!/usr/bin/zsh
 
-WORKSPACES=$(<<etabli>> get_workspaces)
+WORKSPACES=$(<<etabli>> --list_workspaces)
 echo $WORKSPACES
 SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Go to workspace" | awk -F " " '{print $NF}')
 if [[ $SELECTED_WORKSPACE ]]; then
@@ -77,7 +77,7 @@ After sending the container, we "follow" it by also switching the workspace.
 #!/usr/bin/zsh
 
 
-WORKSPACES=$(<<etabli>> get_workspaces)
+WORKSPACES=$(<<etabli>> --list_workspaces)
 echo $WORKSPACES
 SELECTED_WORKSPACE=$(echo $WORKSPACES | <<dmenu-command>> "Send to workspace" | awk -F " " '{print $NF}')
 if [[ $SELECTED_WORKSPACE ]]; then
@@ -87,52 +87,7 @@ else
     echo "not doing anything"
 fi
 #+END_SRC
-*** To a nearby workspace in the same level
-Sends the current container to a nearby workspace (previous or next one) in the next level
 
-#+BEGIN_SRC sh :tangle ./rofi-container-level :results output silent :noweb yes
-#!/usr/bin/zsh
-
-if (($1==1)); then
-   WORKSPACE=$(<<etabli>> name_next_workspace_in_level)
-else
-   WORKSPACE=$(<<etabli>> name_previous_workspace_in_level)
-fi
-echo "$WORKSPACE"
-swaymsg move container to workspace "$WORKSPACE"
-swaymsg workspace "$WORKSPACE"
-#+END_SRC
-*** To a new workspace in the same level
-Sends the current container to a nearby workspace (previous or next one) in the next level
-
-#+BEGIN_SRC sh :tangle ./rofi-container-new-level :results output silent :noweb yes
-#!/usr/bin/zsh
-
-WORKSPACE=$(<<etabli>> name_new_workspace_in_level)
-echo "$WORKSPACE"
-swaymsg move container to workspace "$WORKSPACE"
-swaymsg workspace "$WORKSPACE"
-#+END_SRC
-
-** Listing all windows
-This time, we
-#+BEGIN_SRC sh :tangle ./rofi-window-find :results output silent :noweb yes
-#!/usr/bin/zsh
-
-WINDOWS=$(<<etabli>> list_windows)
-echo $WINDOWS
-SELECTED_DATA=$(echo $WINDOWS | <<dmenu-command>> "Select window")
-if [[ $SELECTED_DATA ]]; then
-    SELECTED_WORKSPACE=$(echo -n $SELECTED_DATA | cut -f 1)
-    SELECTED_WINDOW=$(echo -n $SELECTED_DATA | cut -f 2)
-    echo $SELECTED_WORKSPACE
-    echo $SELECTED_WINDOW
-    swaymsg workspace "$SELECTED_WORKSPACE"
-    <<etabli>> focus_window "$SELECTED_WINDOW"
-else
-    echo "not doing anything"
-fi
-#+END_SRC
 
 ** Using level variables
 Setting a level variable is simple, we simply need to run the =etabli= command with some arguments.

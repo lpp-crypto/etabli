@@ -1,7 +1,7 @@
 #!/usr/bin/zsh
 
 
-WORKSPACES=$(python3 ~/etabli/etabli.py get_workspaces)
+WORKSPACES=$(etabli --list_workspaces)
 echo $WORKSPACES
 SELECTED_WORKSPACE=$(echo $WORKSPACES | rofi -dmenu -i -monitor -1 -config ~/.config/rofi/rofi.rasi -p  "Send to workspace" | awk -F " " '{print $NF}')
 if [[ $SELECTED_WORKSPACE ]]; then

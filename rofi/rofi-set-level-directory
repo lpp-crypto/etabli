@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-CURRENT_DIRECTORY=$(python3 ~/etabli/etabli.py get_level_variable directory)
+CURRENT_DIRECTORY=$(etabli get_level_variable directory)
 if [[ $CURRENT_DIRECTORY == "" ]]; then
     EXPLAIN="New level directory"
 else
@@ -10,7 +10,7 @@ fi
 NEW_DIRECTORY=$(find ~/ -type d -not -path "*/.*" -not -path "*miniforge*" | rofi -dmenu -i)
 echo $NEW_DIRECTORY
 if [[ $NEW_DIRECTORY ]]; then
-    python3 ~/etabli/etabli.py set_level_variable directory "$NEW_DIRECTORY"
+    etabli set_level_variable directory "$NEW_DIRECTORY"
 else
     echo "doing nothing"
 fi
