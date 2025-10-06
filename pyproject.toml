@@ -1,0 +1,18 @@
+[project]
+name = "etabli"
+version = "1.0"
+description = "Tools to organize and interact with workspaces in SWAY/i3"
+
+
+[project.scripts]
+etabli_board   = "etabli.scripts.board:main_cli"
+etabli_waybar  = "etabli.scripts.waybar:main_cli"
+etabli_prepare = "etabli.scripts.prepare:main_cli"
+etabli = "etabli.scripts.etabli:main_cli"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["etabli", "etabli.scripts"]
