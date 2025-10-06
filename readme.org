@@ -1,5 +1,5 @@
 #+TITLE: ETABLI: name-based workspace management for SWAY
-#+Time-stamp: <2025-03-01 18:10:44>
+#+Time-stamp: <2025-10-06 14:54:20>
 
 
 
@@ -30,19 +30,19 @@ To use, simply add something like the following snippets to your =sway= configur
 
 *** Moving within levels
 #+BEGIN_SRC
-bindsym $mod+o exec python3 <path/to/etabli.py> next_workspace_in_level
-bindsym $mod+u exec python3 <path/to/etabli.py> previous_workspace_in_level
-bindsym $mod+Shift+o exec python3 <path/to/etabli.py> new_workspace_in_level
+bindsym $mod+o exec etabli --next_workspace_in_level
+bindsym $mod+u exec etabli --previous_workspace_in_level
+bindsym $mod+p etabli --new_workspace_in_level
 #+END_SRC
 
-With this configuration, pressing =mod+o= will move the focus to the next workspace (in alphabetic order) on the same level. It does nothing if there is a single workspace on this level. Pressing =mod+u= moves the other way. Finally, pressing =mod+Shift+o= moves the focus to a new workspace on the same level.
+With this configuration, pressing =mod+o= will move the focus to the next workspace (in alphabetic order) on the same level. It does nothing if there is a single workspace on this level. Pressing =mod+u= moves the other way. Finally, pressing =mod+p= moves the focus to a new workspace on the same level, whose name is an increasing counter.
 
 *** Moving in general
 The levels (including those with a unique workspace) are displayed in alphabetic order, not by increasing indices (on purpose). To switch workspace in the same order (as if they were, say, firefox tabs), you can also add the following.
 
 #+BEGIN_SRC
-bindsym $mod+Next exec python3 <path/to/etabli.py> next_workspace
-bindsym $mod+Prior exec python3 <path/to/etabli.py> prev_workspace
+bindsym $mod+Next exec etabli --next_workspace
+bindsym $mod+Prior exec etabli --prev_workspace
 #+END_SRC
 
 The keys =Next= and =Prior= correspond to the "page down" and "page up" keys. Pressing =mod+page down= will then shift to the next workshop in the list as it is displayed, ignoring the division into levels.
