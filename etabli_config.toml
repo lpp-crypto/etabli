@@ -36,5 +36,4 @@ dlm = " | "
 
 [prepare]
 firefox = "firefox"
-comms = ["thunderbird", "signal-desktop --password-store=gnome-libsecret", "chromium-browser https://naro.brute-force.eu/element/#/home"]
 steam = "steam"
