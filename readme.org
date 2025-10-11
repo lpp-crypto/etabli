@@ -1,28 +1,38 @@
 #+TITLE: ETABLI: name-based workspace management for SWAY
-#+Time-stamp: <2025-10-11 11:40:27>
+#+Time-stamp: <2025-10-11 12:29:24>
 
 
 
 * Initial Disclaimer
-This project taking shape: I use as my daily driver on two different computers. Still, very much at the alpha stage.
+This project is taking shape: I use as my daily driver on two different computers without any problems. Let's say it is in the beta phase.
 
 * What is Etabli?
-** Tagline
-Allow non-trivial workspace management in =sway=!
+** Overview
+**Etabli** is a toolset to simplify, naming, grouping, and navigating through workspaces in [[https://swaywm.org/][sway]] (it should work fine with [[https://i3wm.org/][i3]] as well).
+
+The core idea is to give a function to workspace, and to group these workspaces into "levels" that, themselves, correspond to different tasks/projects, etc. You can see it as each level being a large virtual workspace that spans multiple real workspaces. To help with this, a [[https://github.com/Alexays/Waybar][waybar]] plugin is also provided.
+
+Let's see what it means in practice. In the screencap below, look at the top left, on the waybar. The levels are "1" and "etabli". Then, level "1" contains 3 workspaces ("comms", "firefox", and "steam"), and "etabli" contains another 3.  The idea here is that "1" corresponds essentially to personal stuff (it is the default name), while "etabli" contains the workspaces I use to work on it.
 
 #+CAPTION: What it can look like
 [[./figures/example.png]]
-** Goals
-Using =swaywm= as a window manager, I work on multiple projects at the same time. Each project requires multiple workspaces: typically, an emacs/evince workspace to write my notes, a workspace just for firefox with the tabs relevant to this project only, and another workspace with emacs/several terminals for the experimental part. Navigating these workspaces using only numbers is very cumbersome: I constantly create and delete new ones.
 
-As a consequence, I wanted a way to:
-1. have workspaces defined by their names, not their number, along with a convenient =dmenu= interface to switch between them;
-2. group workspaces by theme, and cycle through the workspaces withing a theme easily;
-3. easily create a workspace with a specific set of windows opened, laid out in a specific way, automatically.
+Based on my sway configuration, I can do the following. By hitting =mod-o= or =mod-u=, I can cycle through the workspaces within a given level; and by hitting =mod-1= or =mod-2= I can cycle through the levels. Hitting =mod-p= creates a new workspace within a level. Doing any of these operations while holding shift will do the same, except that the focused windows will come along. For example, =mod-Shift-p= will create a new workspace containing the current window.
 
-The first goal is achieved pretty easily since =swaywm= provides what we need basically out of the box. The next ones require a bit more work.
-** Usage
-A level is simply defined as a set of workspace with names starting with the same string followed by a separator (by default, =/=). For example, =code/compile= and =code/sources= are automatically grouped into the same level.
+Additional functionalities are provided using basic [[https://github.com/davatorium/rofi][rofi]] scripts, such as an easy renaming of a workspace, or a way to jump to another workspace (see below).
+
+#+CAPTION: Switching workspace.
+[[./figures/workspace-switcher.png]]
+
+The "prepare" utility allows the creation of a new workspace within a level for which the creation will call some programs. For example, =prepare etabli/firefox= would create a new workspace called =firefox= and start the browser in it. This behaviour is easily configured in the =.etabli_config.toml= file that you must put in your home.
+
+** CLI tools
+**Etabli** provides the following four CLI tools.
+- =etabli= :: use this one to cycle through workspaces, through levels, etc. Add calls to this one in your sway configuration (examples are given further below).
+- =etabli_waybar= :: this one provides daemon that outputs a new pango formatted string anytime a change to the workspace is made. It can thus be piped into 
+- =etabli_prepare= :: TODO
+
+
 
 * Setup
 ** Dependencies
@@ -35,7 +45,7 @@ To use, simply add something like the following snippets to your =sway= configur
 #+BEGIN_SRC
 bindsym $mod+o exec etabli --next_workspace_in_level
 bindsym $mod+u exec etabli --previous_workspace_in_level
-bindsym $mod+p etabli --new_workspace_in_level
+bindsym $mod+p exec etabli --new_workspace_in_level
 #+END_SRC
 
 With this configuration, pressing =mod+o= will move the focus to the next workspace (in alphabetic order) on the same level. It does nothing if there is a single workspace on this level. Pressing =mod+u= moves the other way. Finally, pressing =mod+p= moves the focus to a new workspace on the same level, whose name is an increasing counter.
@@ -77,5 +87,3 @@ The appearance of the waybar module is configured by changing the prettifying fu
     padding-right:2px;
 }
 #+END_SRC
-* Known problems
-- Multiple outputs are not handle very gracefully by the waybar module: it simply displays the workspaces of the focused output, on all outputs at the same time. Any suggestions to fix this is welcome!
