@@ -8,6 +8,7 @@ description = "Tools to organize and interact with workspaces in SWAY/i3"
 etabli_board   = "etabli.scripts.board:main_cli"
 etabli_waybar  = "etabli.scripts.waybar:main_cli"
 etabli_prepare = "etabli.scripts.prepare:main_cli"
+etabli_dmenu = "etabli.scripts.dmenu:main_cli"
 etabli = "etabli.scripts.etabli:main_cli"
 
 [build-system]

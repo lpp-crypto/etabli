@@ -454,10 +454,17 @@ class Etabli:
         return result 
 
 
-    def print_workspaces(self):
+    def list_workspaces(self):
+        result = []
         for lev in sorted(self.levels.keys(), key=str.casefold):
             for ws in self.levels[lev]:
-                print(self.config.format_workspace_name(lev, ws))
+                result.append(self.config.format_workspace_name(lev, ws))
+        return result
+                
+
+    def print_workspaces(self):
+        for ws in self.list_workspaces():
+            print(ws)
                 
 
     # !SUBSECTION! "With" environment

@@ -29,7 +29,7 @@ NOT_VISIBLE_OTHER_OUTPUT = "NOT_VISIBLE_OTHER_OUTPUT"
 KEEP_GOING = True
 DONE = False
 
-default_config_path = Path.home() / ".etabli_config"
+default_config_path = Path.home() / ".etabli_config.toml"
 
 
 # !SECTION! Parsing configuration file
