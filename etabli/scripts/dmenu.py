@@ -12,7 +12,7 @@ from etabli import *
 def dmenu_get(dmenu, prompt, options, preset=""):
     possibilities = "\n".join(options)
     cmd = dmenu.split(" ") + [prompt]
-    if preset != "":
+    if preset != "" and "rofi" in cmd:
         cmd +=  ["-filter", preset]
     p = subprocess.run(cmd,
                        input=possibilities.encode("UTF-8"),

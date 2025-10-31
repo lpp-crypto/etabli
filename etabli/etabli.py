@@ -23,22 +23,11 @@ class Workspace:
         
     def pango_formatted(self, theme):
         if self.focused:
-            return " <span color='{}' {}>{}</span>".format(
-                theme["sp"][FOCUSED],
-                theme["sp"]["ON_TOP"],
-                self.name
-            )
+            return theme["sp"]["FOCUSED"].format(self.name)
         elif self.on_top:
-            return " <span color='{}' {}>{}</span>".format(
-                theme["sp"][self.level.visibility],
-                theme["sp"]["ON_TOP"],
-                self.name
-            )            
+            return theme["ontop"][self.level.visibility].format(self.name)
         else:
-            return " <span color='{}'>{}</span>".format(
-                theme["sp"][self.level.visibility],
-                self.name
-            )
+            return theme["sp"][self.level.visibility].format(self.name)
 
         
     def __str__(self):
@@ -106,23 +95,15 @@ class Level:
                 
     def pango_formatted(self, theme):
         # opening delimiter
-        result = " <span color='{}'>{}</span>".format(
-            theme["sbl"][self.visibility],
-            theme["dlm"]["open"]
-        )
+        result = " " + theme["sbl"]["open"][self.visibility]
         # level name
-        result += "<span color='{}' style='italic'>{}</span>".format(
-            theme["lvl"][self.visibility],
-            self.name
-        )
+        result += theme["lvl"][self.visibility].format(self.name)
         # workspaces names
         for index in sorted(self.spaces.keys(), key=str.casefold):
-            result += self.spaces[index].pango_formatted(theme)
+            result += " " + self.spaces[index].pango_formatted(theme)
         # closing delimiter
-        result += "<span color='{}'>{}</span>".format(
-            theme["sbl"][self.visibility],
-            theme["dlm"]["closed"]
-        )
+        
+        result += theme["sbl"]["close"][self.visibility]
         return result
 
 
@@ -149,7 +130,13 @@ class Board:
 
 
     def __call__(self, level, name):
-        return self.db[level][name]
+        if level in self.db:
+            if name in self.db[level]:
+                if name == "dir": # special case of directories: we
+                                  # handle the expansion in python
+                    return str(Path(self.db[level][name]).expanduser())
+                return self.db[level][name]
+        return ""
     
     
     def stick_to_level(self, level, key, string):

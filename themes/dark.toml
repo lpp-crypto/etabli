@@ -1,7 +1,3 @@
-board_path = "~/.etabli_board"
-dmenu = "rofi -dmenu -config ~/.config/rofi/rofi.rasi -i -p"
-hrule = " "
-
 [theme]
 
 [theme.sp]
@@ -42,7 +38,3 @@ dlm_color = "#881144"
 key_color = "#707070"
 txt_color = "#252525"
 dlm = " | "
-
-[prepare]
-firefox = "firefox"
-
